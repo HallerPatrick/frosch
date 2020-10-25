@@ -4,10 +4,8 @@ import traceback
 import sys
 import pdb
 
-from pathlib import Path
 
 from colorama import init
-from blessings import Terminal
 
 from .parser import OutputParser
 from .analyzer import retrieve_post_mortem_stack_infos
