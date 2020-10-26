@@ -20,21 +20,34 @@ def _flush(message):
 
 def pytrace_excepthook(error_type, error_message, tb=None):
 
+    traceback_entries = traceback.extract_tb(tb)
 
-    locals, globals = retrieve_port_mortem_infos(tb)
+    locals, globals = retrieve_post_mortem_stack_infos(tb)
 
     op = OutputParser()
 
-    # _flush("Traceback (most recent call last):")
-    # for entry in traceback_entries:
-    #     _flush(op.format_traceback(entry))
+    handle_stacktrace(traceback_entries, op)
 
-    # _flush("")
+    last_stack = traceback_entries[-1]
 
-    # _flush(traceback_entries[-1]._line)
+    parse_error_line(last_stack.line, locals, globals)
+
+
+def parse_error_line(line, locals, globals):
+    # TODO: Lets parse this correctly with 
+    # Python parser or ASt? 
+    eval(line, globals, locals)
+
+
+def handle_stacktrace(traceback_entries, op):
+    _flush("Traceback (most recent call last):")
+    for entry in traceback_entries:
+        _flush(op.format_traceback(entry))
+
+    _flush("")
+
+    _flush(traceback_entries[-1]._line)
 
     # _flush(op.format_error(error_type, error_message, traceback_entries[-1]))
     
-
-
 
