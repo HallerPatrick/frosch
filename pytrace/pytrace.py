@@ -1,3 +1,4 @@
+import ast
 from bdb import Bdb
 import bdb
 import traceback
@@ -7,7 +8,7 @@ import pdb
 
 from colorama import init
 
-from .parser import OutputParser
+from .parser import OutputParser, Var
 from .analyzer import retrieve_post_mortem_stack_infos
 
 def hook():
@@ -30,13 +31,35 @@ def pytrace_excepthook(error_type, error_message, tb=None):
 
     last_stack = traceback_entries[-1]
 
-    parse_error_line(last_stack.line, locals, globals)
+    names = parse_error_line(last_stack.line, locals, globals)
 
+    for name in names:
+        try:
+            value = eval(name.name, globals, locals)
+            value_type = eval("type({})".format(name.name), globals, locals)
+            name.value = value
+            name.type = value_type
+        except NameError:
+            # Probably the to assigned value
+            pass
+    
+
+    del names[0]
+    print("")
+    print(" {} || {}".format(last_stack.lineno,last_stack.line))
+    op.render_values(names) 
 
 def parse_error_line(line, locals, globals):
     # TODO: Lets parse this correctly with 
     # Python parser or ASt? 
-    eval(line, globals, locals)
+    # eval(line, globals, locals)
+    names = []
+    tree = ast.parse(line)
+    for node in ast.walk(tree):
+        # For now just try to do it with names
+        if isinstance(node, ast.Name):
+            names.append(Var(node.id, node.col_offset))
+    return names
 
 
 def handle_stacktrace(traceback_entries, op):
@@ -46,7 +69,7 @@ def handle_stacktrace(traceback_entries, op):
 
     _flush("")
 
-    _flush(traceback_entries[-1]._line)
+    # _flush(traceback_entries[-1]._line)
 
     # _flush(op.format_error(error_type, error_message, traceback_entries[-1]))
     
