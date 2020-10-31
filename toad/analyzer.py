@@ -1,4 +1,4 @@
-from pdb import Bdb
+from bdb import Bdb
 
 def retrieve_post_mortem_stack_infos(tb):
     b = Bdb()

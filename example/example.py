@@ -10,9 +10,14 @@ hook()
 
 def hello():
     y = "Some String"
-    z = 3
+    z = [1, 2, "hel"]
+    index = 0
     i = "Other string"
-    x = y +  z + i
+    x = y + z[index] + i + 4 + "ROFL"
+
+
+def num():
+    return 3
 
 
 hello()
