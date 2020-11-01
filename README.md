@@ -21,3 +21,15 @@ last line with all its last values *before* you crashed the program.
 $ pip install 
 
 ```
+
+## Usage 
+
+```python
+
+from frosch import init
+
+init()
+
+x = 3 + "String"
+
+```

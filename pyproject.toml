@@ -7,9 +7,7 @@ authors = ["Patrick Haller <patrickhaller40@googlemail.com>"]
 [tool.poetry.dependencies]
 python = "^3.6"
 colorama = "^0.4.4"
-requests = "^2.24.0"
 Pygments = "^2.7.2"
-toady = "^1.70"
 
 [tool.poetry.dev-dependencies]
 
