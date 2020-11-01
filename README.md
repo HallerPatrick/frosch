@@ -1,5 +1,9 @@
 # frosch - Runtime Error Debugger
 
+<p>
+[![PyPI version](https://badge.fury.io/py/frosch.svg)](https://badge.fury.io/py/frosch)
+![Codecov](https://img.shields.io/codecov/c/github/HallerPatrick/frosch)
+</p>
 Better runtime error messages 
 
 Are you also constantly seeing the runtime error message the 
