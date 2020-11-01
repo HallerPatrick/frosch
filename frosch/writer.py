@@ -55,6 +55,8 @@ class Variable:
     @property
     def type_name(self):
         """Getter for type of variable in string format"""
+        if self.type is None:
+            return "None"
         return self.type.__name__
 
 
