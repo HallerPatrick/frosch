@@ -1,44 +1,46 @@
+"""
+
+    frosch - Better runtime errors
+
+    Patrick Haller
+    betterthannothing.blog
+    patrickhaller40@googlemail.com
+
+    License MIT
+
+"""
+
 import ast
-from bdb import Bdb
-import bdb
-import traceback
 import sys
-import pdb
+import traceback
+from bdb import Bdb
+from contextlib import contextmanager
 from typing import List
 
-from contextlib import contextmanager
+from colorama import deinit, init
 
-from colorama import init, deinit
-
-from .parser import OutputParser, Variable
-from .analyzer import retrieve_post_mortem_stack_infos
+from .writer import ConsoleWriter, Variable
 
 
 @contextmanager
 def support_windows_colors():
+    """Only for windows terminal"""
     init()
     yield
     deinit()
 
 def hook():
+    """Overwrite sys.excepthook and make sure windows color work too"""
     with support_windows_colors():
         sys.excepthook = pytrace_excepthook
 
-def _flush(message):
-    sys.stderr.write(message + "\n")
-    sys.stderr.flush()
-
-def pytrace_excepthook(error_type, error_message, tb=None):
+def pytrace_excepthook(error_type: type, error_message: TypeError, tb: traceback=None):
+    """New excepthook to overwrite sys.excepthook"""
 
     traceback_entries = traceback.extract_tb(tb)
     formatted_tb = traceback.format_exception(error_type, error_message, tb)
 
     locals_, globals_ = retrieve_post_mortem_stack_infos(tb)
-
-    op = OutputParser()
-
-    # handle_stacktrace(traceback_entries, op)
-    print(op.output_traceback("".join(formatted_tb)))
 
     last_stack = traceback_entries[-1]
 
@@ -46,15 +48,17 @@ def pytrace_excepthook(error_type, error_message, tb=None):
 
     variables = debug_variables(names, locals_, globals_)
 
-    op.render_last_line(last_stack.lineno,last_stack.line)
-    op.render_values(variables) 
-    print()
+    console_writer = ConsoleWriter()
+    console_writer.output_traceback("".join(formatted_tb))
+    console_writer.render_last_line(last_stack.lineno,last_stack.line)
+    console_writer.write_debug_tree(variables)
+    console_writer._write_out("\n")
 
-def debug_variables(variables: List[Variable], locals_, globals_) -> List[Variable]:
+def debug_variables(variables: List[Variable], locals_: dict, globals_: dict) -> List[Variable]:
+    """Evaluate for every given variable the value and type"""
     for var in variables:
         try:
             value = eval(var.name, globals_, locals_)
-            var.type = type(value)
             var.value = value
         except NameError:
             pass
@@ -62,9 +66,7 @@ def debug_variables(variables: List[Variable], locals_, globals_) -> List[Variab
 
 
 def parse_error_line(line: str):
-    # TODO: Lets parse this correctly with 
-    # Python parser or ASt? 
-    # eval(line, globals, locals)
+    """Parse a line of python code and extract all (variable) names from it"""
     variables = []
     tree = ast.parse(line)
     for node in ast.walk(tree):
@@ -74,10 +76,14 @@ def parse_error_line(line: str):
     return variables
 
 
-def handle_stacktrace(traceback_entries, op):
-    _flush("Traceback (most recent call last):")
-    for entry in traceback_entries:
-        _flush(op.format_traceback(entry))
+def retrieve_post_mortem_stack_infos(traceback_):
+    """Retrieve post mortem all local and global
+    variables of given traceback"""
 
-    _flush("")
+    base_debugger = Bdb()
+    stack, i = base_debugger.get_stack(None, traceback_)
 
+    # Get global and local vals
+    locals_ = stack[i][0].f_locals
+    globals_ = stack[i][0].f_globals
+    return locals_, globals_
