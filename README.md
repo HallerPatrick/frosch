@@ -1,4 +1,4 @@
-# frog - Runtime Error Debugger
+# frosch - Runtime Error Debugger
 
 Better runtime error messages 
 
@@ -18,7 +18,7 @@ last line with all its last values *before* you crashed the program.
 ## Installation
 
 ```bash
-$ pip install 
+$ pip install frosch
 
 ```
 

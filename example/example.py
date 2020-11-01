@@ -4,7 +4,7 @@ import pdb
 
 sys.path.append("..")
 
-from pytrace.pytrace import hook
+from frosch.frosch import hook
 
 hook()
 
