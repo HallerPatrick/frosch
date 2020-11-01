@@ -70,9 +70,9 @@ class ConsoleWriter:
         self.python_lexer = Python3Lexer()
         self.python_traceback_lexer = Python3TracebackLexer()
 
-    def output_traceback(self, tb):
+    def output_traceback(self, traceback_):
         """Highlight traceback and write out"""
-        self._write_out(highlight(tb, self.python_traceback_lexer, self.terminal_formater))
+        self._write_out(highlight(traceback_, self.python_traceback_lexer, self.terminal_formater))
 
     @staticmethod
     def offset_vert_lines(offsets) -> str:
@@ -100,6 +100,12 @@ class ConsoleWriter:
         self.stderr.write(message)
         self.stderr.flush()
 
+    def write_newline(self):
+        """Write newline to stderr"""
+        self.stderr.write("\n")
+        self.stderr.flush()
+
+
     def write_debug_tree(self, names: List[Variable]):
         """Sort offsets and values for construction of debug tree"""
 
@@ -113,7 +119,8 @@ class ConsoleWriter:
         self.construct_debug_tree(lines, sorted_values)
 
         for line in lines:
-            self._write_out(line + "\n")
+            self._write_out(line)
+            self.write_newline()
 
     def construct_debug_tree(self, lines, sorted_values):
         """Construction of debug tree"""
@@ -155,7 +162,7 @@ class ConsoleWriter:
 
     def render_last_line(self, lineno: int, line: str):
         """Write out the line which throws runtime error with highlighting"""
-        self._write_out("\n")
+        self.write_newline()
         self._write_out(" {} {} {}\n".format(
             lineno,
             self.left_bar(),

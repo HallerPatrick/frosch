@@ -34,13 +34,13 @@ def hook():
     with support_windows_colors():
         sys.excepthook = pytrace_excepthook
 
-def pytrace_excepthook(error_type: type, error_message: TypeError, tb: traceback=None):
+def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: traceback=None):
     """New excepthook to overwrite sys.excepthook"""
 
-    traceback_entries = traceback.extract_tb(tb)
-    formatted_tb = traceback.format_exception(error_type, error_message, tb)
+    traceback_entries = traceback.extract_tb(traceback_)
+    formatted_tb = traceback.format_exception(error_type, error_message, traceback_)
 
-    locals_, globals_ = retrieve_post_mortem_stack_infos(tb)
+    locals_, globals_ = retrieve_post_mortem_stack_infos(traceback_)
 
     last_stack = traceback_entries[-1]
 
@@ -52,7 +52,7 @@ def pytrace_excepthook(error_type: type, error_message: TypeError, tb: traceback
     console_writer.output_traceback("".join(formatted_tb))
     console_writer.render_last_line(last_stack.lineno,last_stack.line)
     console_writer.write_debug_tree(variables)
-    console_writer._write_out("\n")
+    console_writer.write_newline()
 
 def debug_variables(variables: List[Variable], locals_: dict, globals_: dict) -> List[Variable]:
     """Evaluate for every given variable the value and type"""
