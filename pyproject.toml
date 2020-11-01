@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "toad"
-version = "0.1.0"
+name = "frosch"
+version = "0.1.1"
 description = "Better runtime error messages"
 authors = ["Patrick Haller <patrickhaller40@googlemail.com>"]
 
