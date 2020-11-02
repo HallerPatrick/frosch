@@ -123,7 +123,7 @@ class ConsoleWriter:
             raise WrongWriteOrder("Offset not defined") from type_error
 
         lines = [
-            "  {}{} ".format(line_offset, self.left_bar()) for _ in range((2*num_variables) + 1)
+           "  {}{} ".format(line_offset, self.left_bar()) for _ in range((2*num_variables) + 1)
         ]
 
 

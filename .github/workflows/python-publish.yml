@@ -30,5 +30,10 @@ jobs:
       env:
         USER: ${{ secrets.PYPI_USERNAME }}
         PWD: ${{ secrets.PYPI_PASSWORD }}
-      run: poetry publish --build -u "$USER" -p "$PWD"
+      run: |
+        poetry run python -m pip install --upgrade pip
+        poetry run python -m pip install setuptools wheel
+        poetry build
+        poetry publish -u "$USER" -p "$PWD"
+
 
