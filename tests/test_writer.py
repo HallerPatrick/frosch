@@ -126,12 +126,6 @@ def test_render_last_line(capsys):
     assert output == "42 || x = hello * 'String'"
 
 def test_write_debug_tree(capsys):
-    lines = [
-        "",
-        "",
-        "",
-        "",
-    ]
     Variable = writer.Variable
 
     var1 = Variable("y", 0)
@@ -141,7 +135,32 @@ def test_write_debug_tree(capsys):
     var2.value = "Other"
     sorted_values = [var1, var2]
 
-    result = writer.ConsoleWriter().write_debug_tree(sorted_values)
+    console_writer = writer.ConsoleWriter()
+    console_writer.left_offset = 1
+    console_writer.write_debug_tree(sorted_values)
+
+    capture = capsys.readouterr()
+    result = escape_ansi(capture.err)
+    expected_result = """   || │ │
+   || │ └── x: str = "Other"
+   || │
+   || └── y: str = "Something"
+   || \n"""
+    assert result == expected_result
+
+def test_write_debug_tree_offset_2(capsys):
+    Variable = writer.Variable
+
+    var1 = Variable("y", 0)
+    var1.value = "Something"
+
+    var2 = Variable("x", 2)
+    var2.value = "Other"
+    sorted_values = [var1, var2]
+
+    console_writer = writer.ConsoleWriter()
+    console_writer.left_offset = 2
+    console_writer.write_debug_tree(sorted_values)
 
     capture = capsys.readouterr()
     result = escape_ansi(capture.err)

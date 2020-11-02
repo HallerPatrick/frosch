@@ -19,6 +19,8 @@ from pygments.formatters.terminal256 import Terminal256Formatter
 from pygments.lexers.python import Python3Lexer, Python3TracebackLexer
 from pygments.styles.monokai import MonokaiStyle
 
+class WrongWriteOrder(Exception):
+    """Thrown when the correct order of parts to be written to stderr is not correct"""
 
 class Variable:
     """Dataclass for a variable in error throwing line of program"""
@@ -71,6 +73,7 @@ class ConsoleWriter:
         self.terminal_formater = Terminal256Formatter(style=MonokaiStyle)
         self.python_lexer = Python3Lexer()
         self.python_traceback_lexer = Python3TracebackLexer()
+        self.left_offset = None
 
     def output_traceback(self, traceback_):
         """Highlight traceback and write out"""
@@ -114,8 +117,14 @@ class ConsoleWriter:
         sorted_values = list(sorted(names, key=lambda val: val.col_offset))
 
         num_variables = len(sorted_values)
+        try:
+            line_offset = " " * self.left_offset
+        except TypeError as type_error:
+            raise WrongWriteOrder("Offset not defined") from type_error
 
-        lines = ["    {} ".format(self.left_bar()) for _ in range((2*num_variables) + 1)]
+        lines = [
+            "  {}{} ".format(line_offset, self.left_bar()) for _ in range((2*num_variables) + 1)
+        ]
 
 
         self.construct_debug_tree(lines, sorted_values)
@@ -165,6 +174,7 @@ class ConsoleWriter:
     def render_last_line(self, lineno: int, line: str):
         """Write out the line which throws runtime error with highlighting"""
         self.write_newline()
+        self.left_offset = len(str(lineno))
         self._write_out(" {} {} {}\n".format(
             lineno,
             self.left_bar(),
