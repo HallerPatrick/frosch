@@ -11,3 +11,5 @@
 """
 
 from .frosch import hook
+
+__all__ = ["hook"]
