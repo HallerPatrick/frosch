@@ -27,11 +27,14 @@ $ pip install frosch
 
 ## Usage 
 
+
+Call the hook function at the beginning of your program.
+
 ```python
 
-from frosch import init
+from frosch import hook
 
-init()
+hook()
 
 x = 3 + "String"
 
