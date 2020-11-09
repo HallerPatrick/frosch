@@ -98,7 +98,7 @@ class ConsoleWriter:
     @staticmethod
     def left_bar() -> str:
         """Bar used on left side of debug tree"""
-        return colorama.Fore.BLUE + "||"
+        return colorama.Fore.BLUE + "||" + colorama.Style.RESET_ALL
 
     def _write_out(self, message: str):
         """Write to stderr"""
