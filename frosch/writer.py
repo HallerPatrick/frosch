@@ -36,6 +36,8 @@ class Variable:
 
     def tree_str(self):
         """Python>3.8 variable declaration format with types"""
+        if self.value is None:
+            return "{} = None".format(self.name)
         return "{}: {} = {!r}".format(self.name, type(self.value).__qualname__, self.value)
 
 
