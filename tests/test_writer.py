@@ -16,7 +16,6 @@ class TestVariable(TestCase):
         self.assertEqual(variable.name, "some_name")
         self.assertEqual(variable.col_offset, 4)
         self.assertIsNone(variable.value)
-        self.assertIsNone(variable.type)
 
     def test_set_value_string(self):
         variable = writer.Variable("other_name", 15)
@@ -36,7 +35,7 @@ class TestVariable(TestCase):
     def test_tree_str_dict(self):
         variable = writer.Variable("other_name", 15)
         variable.value = {}
-        self.assertEqual(variable.tree_str(), "other_name: dict = []")
+        self.assertEqual(variable.tree_str(), "other_name: dict = {}")
 
     def test_tree_str_type_dict(self):
         variable = writer.Variable("other_name", 15)

@@ -49,7 +49,7 @@ class TestFrosch(TestCase):
 
         for variable in expected_result:
             if variable.name == "x":
-                self.assertEqual(variable.value, "'Hello'")
+                self.assertEqual(variable.value, "Hello")
 
             if variable.name == "y":
                 self.assertEqual(variable.value, 3)
