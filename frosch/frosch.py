@@ -14,7 +14,9 @@ import ast
 import sys
 import traceback
 from bdb import Bdb
+import builtins
 from contextlib import contextmanager
+from collections import ChainMap
 from typing import List
 
 from colorama import deinit, init
@@ -56,11 +58,12 @@ def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: t
 
 def debug_variables(variables: List[Variable], locals_: dict, globals_: dict) -> List[Variable]:
     """Evaluate for every given variable the value and type"""
+    chainmap = ChainMap(locals_, globals_, vars(builtins))
     for var in variables:
         try:
-            value = eval(var.name, globals_, locals_)
+            value = chainmap[var.name]
             var.value = value
-        except NameError:
+        except KeyError:
             pass
     return variables
 
