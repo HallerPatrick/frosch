@@ -31,8 +31,7 @@ def support_windows_colors():
 
 def hook():
     """Overwrite sys.excepthook and make sure windows color work too"""
-    with support_windows_colors():
-        sys.excepthook = pytrace_excepthook
+    sys.excepthook = pytrace_excepthook
 
 def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: traceback=None):
     """New excepthook to overwrite sys.excepthook"""
@@ -48,11 +47,12 @@ def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: t
 
     variables = debug_variables(names, locals_, globals_)
 
-    console_writer = ConsoleWriter()
-    console_writer.output_traceback("".join(formatted_tb))
-    console_writer.render_last_line(last_stack.lineno,last_stack.line)
-    console_writer.write_debug_tree(variables)
-    console_writer.write_newline()
+    with support_windows_colors():
+        console_writer = ConsoleWriter()
+        console_writer.output_traceback("".join(formatted_tb))
+        console_writer.render_last_line(last_stack.lineno,last_stack.line)
+        console_writer.write_debug_tree(variables)
+        console_writer.write_newline()
 
 def debug_variables(variables: List[Variable], locals_: dict, globals_: dict) -> List[Variable]:
     """Evaluate for every given variable the value and type"""
