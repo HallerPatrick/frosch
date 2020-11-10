@@ -10,8 +10,6 @@
 
 """
 
-from __future__ import annotations
-
 import sys
 from typing import Any, List
 
@@ -36,7 +34,7 @@ class Variable:
         """str representation of a Variable object"""
         return "Variable({!r}, {}, {!r})".format(self.name, self.col_offset, self.value)
 
-    def __eq__(self, other: Variable):
+    def __eq__(self, other: "Variable"):
         """Mainly for testing purpose"""
         return self.__hash__() == other.__hash__()
 
