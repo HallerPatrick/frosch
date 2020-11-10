@@ -34,6 +34,14 @@ class Variable:
         """str representation of a Variable object"""
         return "Variable({!r}, {}, {!r})".format(self.name, self.col_offset, self.value)
 
+    def __eq__(self, other: "Variable"):
+        """Mainly for testing purpose"""
+        return self.__hash__() == other.__hash__()
+
+    def __hash__(self):
+        """We don't care for unique hashes"""
+        return hash((self.name, self.col_offset, self.value))
+
     def tree_str(self):
         """Python>3.8 variable declaration format with types"""
         if self.value is None:
