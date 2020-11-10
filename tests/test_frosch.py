@@ -49,12 +49,10 @@ class TestFrosch(TestCase):
 
         for variable in expected_result:
             if variable.name == "x":
-                self.assertEqual(variable.value, '"Hello"')
-                self.assertEqual(variable.type_name, "str")
+                self.assertEqual(variable.value, "Hello")
 
             if variable.name == "y":
                 self.assertEqual(variable.value, 3)
-                self.assertEqual(variable.type_name, "int")
 
     @unittest.skip("How to test this?")
     def test_pytrace_excepthook(self):

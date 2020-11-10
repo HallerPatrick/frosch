@@ -25,44 +25,20 @@ class WrongWriteOrder(Exception):
 class Variable:
     """Dataclass for a variable in error throwing line of program"""
 
-    def __init__(self, id_: str, col_offset: int):
+    def __init__(self, id_: str, col_offset: int, value: Any = None):
         self.name = id_
         self.col_offset = col_offset
-        self._value = None
-        self.type = None
+        self.value = value
 
-    @property
-    def value(self) -> Any:
-        """Value of variable"""
-        return self._value
-
-    @value.setter
-    def value(self, value):
-        """Setter for value"""
-        self.type = type(value)
-
-        if self.type_name == "str":
-            self._value = '"{}"'.format(value)
-        else:
-            self._value = value
-
-    def __str__(self):
+    def __repr__(self):
         """str representation of a Variable object"""
-        return "{}: {} ({})".format(self.name, self.value, self.col_offset)
+        return "Variable({!r}, {}, {!r})".format(self.name, self.col_offset, self.value)
 
     def tree_str(self):
         """Python>3.8 variable declaration format with types"""
-        return "{}: {} = {}".format(self.name, self.type_name, self.value)
-
-    @property
-    def type_name(self):
-        """Getter for type of variable in string format"""
-        if self.type is None:
-            return "None"
-        return self.type.__name__
-
-
-
+        if self.value is None:
+            return "{} = None".format(self.name)
+        return "{}: {} = {!r}".format(self.name, type(self.value).__qualname__, self.value)
 
 
 class ConsoleWriter:
@@ -98,7 +74,7 @@ class ConsoleWriter:
     @staticmethod
     def left_bar() -> str:
         """Bar used on left side of debug tree"""
-        return colorama.Fore.BLUE + "||"
+        return colorama.Fore.BLUE + "||" + colorama.Style.RESET_ALL
 
     def _write_out(self, message: str):
         """Write to stderr"""

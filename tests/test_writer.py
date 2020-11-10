@@ -16,37 +16,36 @@ class TestVariable(TestCase):
         self.assertEqual(variable.name, "some_name")
         self.assertEqual(variable.col_offset, 4)
         self.assertIsNone(variable.value)
-        self.assertIsNone(variable.type)
 
     def test_set_value_string(self):
         variable = writer.Variable("other_name", 15)
         variable.value = "Hello World"
-        self.assertEqual(variable.value, '"Hello World"')
+        self.assertEqual(variable.tree_str(), "other_name: str = 'Hello World'")
 
     def test_set_value_int(self):
         variable = writer.Variable("other_name", 15)
         variable.value = 42
         self.assertEqual(variable.value, 42)
 
-    def test_type_name_value_none(self):
+    def test_tree_str_value_none(self):
         variable = writer.Variable("other_name", 15)
         variable.value = None
-        self.assertEqual(variable.type_name, "NoneType")
+        self.assertEqual(variable.tree_str(), "other_name = None")
 
-    def test_type_name_dict(self):
+    def test_tree_str_dict(self):
         variable = writer.Variable("other_name", 15)
         variable.value = {}
-        self.assertEqual(variable.type_name, "dict")
+        self.assertEqual(variable.tree_str(), "other_name: dict = {}")
 
-    def test_type_name_type_dict(self):
+    def test_tree_str_type_dict(self):
         variable = writer.Variable("other_name", 15)
         variable.value = dict
-        self.assertEqual(variable.type_name, "type")
+        self.assertEqual(variable.tree_str(), "other_name: type = <class 'dict'>")
 
     def test_str_repr(self):
         variable = writer.Variable("other_name", 15)
         variable.value = 12
-        self.assertEqual(str(variable), "other_name: 12 (15)")
+        self.assertEqual(str(variable), "Variable('other_name', 15, 12)")
 
 
 class TestConsoleWriter(TestCase):
@@ -83,7 +82,7 @@ class TestConsoleWriter(TestCase):
 
         result = self.cw.construct_debug_tree(lines, sorted_values)
         result = [escape_ansi(l) for l in result]
-        expected_result = ['│ │', '│ └── x: str = "Other"', '│', '└── y: str = "Something"', '']
+        expected_result = ['│ │', '│ └── x: str = \'Other\'', '│', '└── y: str = \'Something\'', '']
         self.assertListEqual(result, expected_result)
 
 
@@ -142,9 +141,9 @@ def test_write_debug_tree(capsys):
     capture = capsys.readouterr()
     result = escape_ansi(capture.err)
     expected_result = """   || │ │
-   || │ └── x: str = "Other"
+   || │ └── x: str = 'Other'
    || │
-   || └── y: str = "Something"
+   || └── y: str = 'Something'
    || \n"""
     assert result == expected_result
 
@@ -165,8 +164,8 @@ def test_write_debug_tree_offset_2(capsys):
     capture = capsys.readouterr()
     result = escape_ansi(capture.err)
     expected_result = """    || │ │
-    || │ └── x: str = "Other"
+    || │ └── x: str = 'Other'
     || │
-    || └── y: str = "Something"
+    || └── y: str = 'Something'
     || \n"""
     assert result == expected_result
