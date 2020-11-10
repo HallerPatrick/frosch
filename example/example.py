@@ -11,7 +11,8 @@ def hello():
     z = [1, 2, "hel"]
     index = 0
     i = "Other string"
-    # x = y + z[index] + i + 4 + "ROFL"
+    x = (y + 
+        z[index] + i + 4 + "ROFL")
 
 
 def num():

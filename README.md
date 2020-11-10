@@ -39,3 +39,21 @@ hook()
 x = 3 + "String"
 
 ```
+
+## Contribution
+
+`frosch` uses [poetry](https://github.com/python-poetry/poetry) for build and dependency
+management, so please install beforehand.
+
+### Setup
+
+```bash
+$ git clone https://github.com/HallerPatrick/frosch.git
+$ poetry install
+```
+
+### Run tests
+
+```python
+$ python -m pylint tests
+```
