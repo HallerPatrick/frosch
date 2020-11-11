@@ -54,7 +54,7 @@ def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: t
         names = parse_error_line(last_line)
     except ParseError:
         # Try to collect multiline expression
-        last_line = get_whole_expression(last_stack, traceback_)
+        last_line = find_next_parseable_statment(last_stack, traceback_)
         names = parse_error_line(last_line)
 
     variables = debug_variables(names, locals_, globals_)
@@ -93,40 +93,68 @@ def parse_error_line(line: str):
             variables.append(Variable(node.id, node.col_offset))
     return variables
 
+def find_next_parseable_statment(stack: FrameSummary, traceback_: traceback) -> str:
+    """If we handling multiline statements we have to look both ways (up and down)
+    to find the whole statement. We therefore incrementally go up and down the
+    lines and add them to the current line while the single line is not parseable
 
-def get_whole_expression(stack: FrameSummary, traceback_: traceback) -> str:
-    """Try to search the following lines to get a whole parsable expression"""
+    Note:
+        This is not working on all cases, e.g if multiline statement
+        contains lines, which are "parsable" on their own
+        x = (
+            # This line is parsable on its own
+            1 +
+            "String"
+        )
+
+    """
     source_lines = inspect.getsourcelines(traceback_)[0]
 
-    current_lines = [stack.line]
-    current_line_no = stack.lineno
+    current_lines = [source_lines[stack.lineno].strip()]
 
-    parsed = False
+    current_line_before = stack.lineno - 1
+    current_line_after = stack.lineno + 1
 
-    while not parsed:
-        try:
-            current_lines.append(source_lines[current_line_no].strip())
-        except IndexError as error:
-            # Reached EOF
-            # This should never happen, as this means there is a
-            # SyntaxError in the python file, which would be caught
-            # way early, but still...
+    found_parseable_line_before = False
+    found_parseable_line_after = False
 
-            # What is the correct way to handle a failure in frosch?
-            # Is there a way to let the original excepthook handle
-            # from this point?
-            raise SyntaxError("SyntaxError in line:{}".format(stack.lineno)) from error
+    while True:
 
-        whole_line = "".join(current_lines)
+        # Check line before
+        if current_line_before >= 0:
+            if is_parsable(source_lines[current_line_before]):
+                found_parseable_line_before = True
+            else:
+                current_lines.insert(0, source_lines[current_line_before].strip())
+                current_line_before -= 1
+        else:
+            found_parseable_line_before = True
 
-        try:
-            ast.parse(whole_line)
-            parsed = True
-        except SyntaxError:
-            current_line_no += 1
+        # Check line after
+        if not current_line_after >= len(source_lines):
 
-    return " ".join(current_lines)
+            if is_parsable(source_lines[current_line_after]):
+                found_parseable_line_after = True
+            else:
+                current_lines.append(source_lines[current_line_after].strip())
+                current_line_after += 1
+        else:
+            found_parseable_line_after = True
 
+        # If both are parsable return
+        if found_parseable_line_after and found_parseable_line_before:
+            parsable_line = " ".join(current_lines)
+            if is_parsable(parsable_line):
+                return parsable_line
+            raise ParseError("Could not parse mutiline statement: {}".format(parsable_line))
+
+def is_parsable(line: str) -> bool:
+    """Test if a line of python is parsable or not"""
+    try:
+        ast.parse(line.strip())
+    except SyntaxError:
+        return False
+    return True
 
 def retrieve_post_mortem_stack_infos(traceback_):
     """Retrieve post mortem all local and global

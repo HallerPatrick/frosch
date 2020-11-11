@@ -79,6 +79,65 @@ class TestFrosch(TestCase):
         with pytest.raises(frosch.ParseError):
             frosch.parse_error_line(line)
 
+    def test_find_next_parseable_statement(self):
+        with patch("inspect.getsourcelines") as getsourcelines_mock:
+            getsourcelines_mock.return_value = (
+                [
+                    "1+1",
+                    "x = (",
+                    "1",
+                    "+ z)",
+                    "2 + 2"
+                ], 0
+            )
+            stack_mock = Mock()
+            stack_mock.line = "x = ("
+            stack_mock.lineno = 2
+
+            result = frosch.find_next_parseable_statment(stack_mock, None)
+            expected_result = "x = ( 1 + z)"
+            self.assertEqual(result, expected_result)
+
+    def test_find_next_parseable_statement2(self):
+        source_lines = """
+import sys
+sys.path.append("..")
+
+from frosch.frosch import hook
+
+hook()
+
+
+def hello():
+    y = "Some String"
+    z = [1, 2, "hel"]
+    index = 0
+    i = "Other string"
+    x = ( 
+        1 + 
+        z)
+
+
+def num():
+    return 3
+
+
+hello()
+
+"""
+        with patch("inspect.getsourcelines") as getsourcelines_mock:
+            getsourcelines_mock.return_value = (
+                source_lines.split("\n")
+                , 0
+            )
+            stack_mock = Mock()
+            stack_mock.line = "1 +"
+            stack_mock.lineno = 15 
+
+            result = frosch.find_next_parseable_statment(stack_mock, None)
+            expected_result = "x = ( 1 + z)"
+            self.assertEqual(result, expected_result)
+
     def test_get_whole_expression(self):
 
         with patch("inspect.getsourcelines") as getsourcelines_mock:
@@ -93,10 +152,28 @@ class TestFrosch(TestCase):
             stack_mock.line = "x = (y"
             stack_mock.lineno = 1
 
-            result = frosch.get_whole_expression(stack_mock, None)
+            result = frosch.find_next_parseable_statment(stack_mock, None)
             expected_result = "x = (y + 1 + z)"
             self.assertEqual(result, expected_result)
 
+    def test_get_whole_expression2(self):
+
+        with patch("inspect.getsourcelines") as getsourcelines_mock:
+            multi_line = [
+                    "x = (",
+                    "    y + "
+                    "z)"
+                ]
+            getsourcelines_mock.return_value = (
+                multi_line, 0
+            )
+            stack_mock = Mock()
+            stack_mock.line = multi_line[0]
+            stack_mock.lineno = 1
+
+            result = frosch.find_next_parseable_statment(stack_mock, None)
+            expected_result = "x = ( y + z)"
+            self.assertEqual(result, expected_result)
 
     def test_get_whole_expression_syntax_error(self):
 
@@ -110,8 +187,35 @@ class TestFrosch(TestCase):
             stack_mock = Mock()
             stack_mock.line = "x = (y"
             stack_mock.lineno = 1
-            with pytest.raises(SyntaxError):
-                frosch.get_whole_expression(stack_mock, None)
+            with pytest.raises(frosch.ParseError):
+                frosch.find_next_parseable_statment(stack_mock, None)
+
+    def test_is_parsable_true(self):
+        result = frosch.is_parsable("x = 3")
+        self.assertTrue(result)
+
+    def test_is_parsable_false(self):
+        result = frosch.is_parsable("asd3 = (")
+        self.assertFalse(result)
+
+    def test_retrieve_post_mortem_stack_infos(self):
+        with patch("bdb.Bdb.get_stack") as get_stack_mock:
+            stack_mock = Mock()
+            stack_mock.f_locals = {"local":"values"}
+            stack_mock.f_globals = {"global":"values"}
+
+            stack = [[stack_mock]]
+            
+            get_stack_mock.return_value = (stack, 0)
+
+            tb_mock = Mock()
+            result_locals, result_globals = frosch.retrieve_post_mortem_stack_infos(tb_mock)
+
+            get_stack_mock.assert_called_with(None, tb_mock)
+            self.assertEqual(stack_mock.f_locals, result_locals)
+            self.assertEqual(stack_mock.f_globals, result_globals)
+
+
 
     @unittest.skip("How to test this?")
     def test_pytrace_excepthook(self):
