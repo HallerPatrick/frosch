@@ -12,6 +12,8 @@ repository = "https://github.com/HallerPatrick/frosch"
 python = "^3.6"
 colorama = "^0.4.4"
 Pygments = "^2.7.2"
+stack-data = "^0.1.0"
+executing = "^0.5.3"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.6.0"
@@ -24,7 +26,7 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.poetry.scripts]
-example = "example:example"
+example = "example.example:hello"
 
 [tool.pylint.messages_control]
 max-line-width = 100

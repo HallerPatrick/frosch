@@ -19,9 +19,12 @@ import builtins
 from contextlib import contextmanager
 from collections import ChainMap
 import inspect
-from typing import List
+from types import TracebackType
+from typing import List 
 
+import executing
 from colorama import deinit, init
+import stack_data
 
 from .writer import ConsoleWriter, Variable
 
@@ -39,7 +42,7 @@ def hook():
     """Overwrite sys.excepthook and make sure windows color work too"""
     sys.excepthook = pytrace_excepthook
 
-def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: traceback=None):
+def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: TracebackType=None):
     """New excepthook to overwrite sys.excepthook"""
 
     traceback_entries = traceback.extract_tb(traceback_)
@@ -49,6 +52,14 @@ def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: t
 
     last_stack = traceback_entries[-1]
     last_line = last_stack.line
+
+    frame_info = stack_data.FrameInfo(traceback_)
+    t = frame_info.executing.source.statements_at_line(last_stack.lineno)
+    t = t.pop()
+    # TODO: convert ast.Nodes to Python Source Code
+
+    txt = ast.get_source_segment(frame_info.source.text, t)
+    print(txt)
 
     try:
         names = parse_error_line(last_line)
@@ -65,6 +76,10 @@ def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: t
         console_writer.render_last_line(last_stack.lineno, last_line)
         console_writer.write_debug_tree(variables)
         console_writer.write_newline()
+
+def find_statement(traceback_: TracebackType, last_stack):
+    executing.Source.executing(last_stack)
+
 
 def debug_variables(variables: List[Variable], locals_: dict, globals_: dict) -> List[Variable]:
     """Evaluate for every given variable the value and type"""
@@ -93,7 +108,7 @@ def parse_error_line(line: str):
             variables.append(Variable(node.id, node.col_offset))
     return variables
 
-def find_next_parseable_statment(stack: FrameSummary, traceback_: traceback) -> str:
+def find_next_parseable_statment(stack: FrameSummary, traceback_: TracebackType) -> str:
     """If we handling multiline statements we have to look both ways (up and down)
     to find the whole statement. We therefore incrementally go up and down the
     lines and add them to the current line while the single line is not parseable
@@ -156,7 +171,7 @@ def is_parsable(line: str) -> bool:
         return False
     return True
 
-def retrieve_post_mortem_stack_infos(traceback_):
+def retrieve_post_mortem_stack_infos(traceback_: TracebackType):
     """Retrieve post mortem all local and global
     variables of given traceback"""
 
