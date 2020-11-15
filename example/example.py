@@ -7,7 +7,7 @@ from lib import fails
 
 
 def hello():
-    hook(theme="monokai")
+    hook(theme="emacs", message="LOL", title="ITS DONE")
 
     y = "Some String"
     z = [1, 2, "hel"]

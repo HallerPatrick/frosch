@@ -24,6 +24,8 @@ from asttokens.util import Token
 from colorama import deinit, init
 import stack_data
 
+from .config_manager import ConfigManager
+from .notifier import notify_os
 from .writer import ConsoleWriter, Variable
 
 
@@ -37,15 +39,24 @@ def support_windows_colors():
     yield
     deinit()
 
-def hook(theme: str = "monokai"):
-    """Overwrite sys.excepthook and make sure windows color work too"""
+def hook(**kwargs):
+    """Initialize configurations for frosch and set hook"""
+    if kwargs:
+        config_manager = ConfigManager._default()._from_kwargs(**kwargs)
+    else:
+        config_manager = ConfigManager._default()
 
+    pytrace_excepthook.configs = config_manager
+    _hook()
+
+def _hook():
+    """Overwrite sys.excepthook"""
     # Don't want global vars
-    pytrace_excepthook.theme = theme
     sys.excepthook = pytrace_excepthook
 
 def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: TracebackType=None):
     """New excepthook to overwrite sys.excepthook"""
+    configs = pytrace_excepthook.configs
 
     traceback_entries = traceback.extract_tb(traceback_)
     formatted_tb = traceback.format_exception(error_type, error_message, traceback_)
@@ -62,11 +73,14 @@ def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: T
     variables = debug_variables(names, locals_, globals_)
 
     with support_windows_colors():
-        console_writer = ConsoleWriter(pytrace_excepthook.theme)
+        console_writer = ConsoleWriter(configs.theme)
         console_writer.write_traceback("".join(formatted_tb))
         console_writer.write_last_line(last_stack.lineno, line)
         console_writer.write_debug_tree(variables)
         console_writer.write_newline()
+
+    if configs.has_notifier():
+        notify_os(configs.title, configs.message)
 
 def extract_statement_piece(traceback_: TracebackType, last_stack) -> List[List[Token]]:
     """Get frame infos and get code pieces (from stack_data) by line
