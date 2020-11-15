@@ -119,7 +119,13 @@ def parse_error_line(line: str) -> List[Variable]:
         tree = ast.parse(line + "pass")
 
     except SyntaxError as error:
-        raise ParseError("Could not parse line: {}".format(line)) from error
+        if error.args[0] == "unexpected EOF while parsing":
+            try:
+                tree = ast.parse(line + "pass")
+            except SyntaxError as syntax_error:
+                raise ParseError("Could not parse line: {}".format(line)) from syntax_error
+        else:
+            raise ParseError("Could not parse line: {}".format(line)) from error
 
     for node in ast.walk(tree):
         # For now just try to do it with names

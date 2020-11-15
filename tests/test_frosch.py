@@ -84,7 +84,6 @@ class TestFrosch(TestCase):
 
         self.assertCountEqual(result, expected_result)
 
-
     @unittest.skip("Not working yet")
     def test_extract_statement_piece(self):
         """Check if collection of pieces/token from list is working"""
