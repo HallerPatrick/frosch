@@ -304,7 +304,7 @@ testing = ["pytest (>=3.5,<3.7.3 || >3.7.3)", "pytest-checkdocs (>=1.2.3)", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "a303cedf0cf559c50fb6f9d4484bca77981b8fe576c01ece3e68c2199ac46488"
+content-hash = "9e682068d4ecd9d1fe2526824f8388afffab05d33c438808e8ce5248c4f6b3a5"
 
 [metadata.files]
 astroid = [

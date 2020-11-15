@@ -22,7 +22,7 @@ import inspect
 from types import TracebackType
 from typing import List 
 
-import executing
+from asttokens.util import Token
 from colorama import deinit, init
 import stack_data
 
@@ -51,35 +51,46 @@ def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: T
     locals_, globals_ = retrieve_post_mortem_stack_infos(traceback_)
 
     last_stack = traceback_entries[-1]
-    last_line = last_stack.line
 
-    frame_info = stack_data.FrameInfo(traceback_)
-    t = frame_info.executing.source.statements_at_line(last_stack.lineno)
-    t = t.pop()
-    # TODO: convert ast.Nodes to Python Source Code
+    tokens = extract_statement_piece(traceback_, last_stack)
+    line = extract_source_code(tokens)
 
-    txt = ast.get_source_segment(frame_info.source.text, t)
-    print(txt)
-
-    try:
-        names = parse_error_line(last_line)
-    except ParseError:
-        # Try to collect multiline expression
-        last_line = find_next_parseable_statment(last_stack, traceback_)
-        names = parse_error_line(last_line)
+    names = parse_error_line(line)
 
     variables = debug_variables(names, locals_, globals_)
 
     with support_windows_colors():
         console_writer = ConsoleWriter()
         console_writer.output_traceback("".join(formatted_tb))
-        console_writer.render_last_line(last_stack.lineno, last_line)
+        console_writer.render_last_line(last_stack.lineno, line)
         console_writer.write_debug_tree(variables)
         console_writer.write_newline()
 
-def find_statement(traceback_: TracebackType, last_stack):
-    executing.Source.executing(last_stack)
+def extract_statement_piece(traceback_: TracebackType, last_stack) -> List[List]:
+    """Get frame infos and get code pieces (from stack_data) by line
+    of crash """
+    frame_info = stack_data.FrameInfo(traceback_)
+    pieces = frame_info.executing.source.pieces
+    tokens = frame_info.executing.source.tokens_by_lineno
 
+    statement_piece_tokens = []
+    for piece in pieces:
+        if last_stack.lineno in list(piece):
+            for line in list(piece):
+                statement_piece_tokens.append(tokens[line])
+
+    return statement_piece_tokens
+
+def extract_source_code(tokens: List[List]) -> str:
+    """Get all strings of the tokens and flatten into on list"""
+    statement_line = []
+    for line_tokens in tokens:
+        for token in line_tokens:
+            string = token.string
+            if not string.strip() == "":
+                statement_line.append(string.strip())
+    
+    return " ".join(statement_line)
 
 def debug_variables(variables: List[Variable], locals_: dict, globals_: dict) -> List[Variable]:
     """Evaluate for every given variable the value and type"""
@@ -99,6 +110,12 @@ def parse_error_line(line: str):
     try:
         # If we handling multilines this will not be parsed
         tree = ast.parse(line)
+
+    except IndentationError as error:
+        # Case of trying to parse a piece of a statement, like a for loop header
+        # Try again with a pass stament
+        tree = ast.parse(line + "pass")
+
     except SyntaxError as error:
         raise ParseError("Could not parse line: {}".format(line)) from error
 
