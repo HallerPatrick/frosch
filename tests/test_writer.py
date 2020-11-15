@@ -101,7 +101,7 @@ def test_write_out(capsys):
 
 def test_output_traceback_no_formatting_applied(capsys):
     cw = writer.ConsoleWriter()
-    cw.output_traceback("Hello")
+    cw.write_traceback("Hello")
     captured = capsys.readouterr()
     assert captured.err == "Hello\n"
 
@@ -111,7 +111,7 @@ def test_out_traceback_with_format(capsys):
   File "test.py", line 1, in <module>
     3 + 'String'
 TypeError: unsupported operand type(s) for +: 'int' and 'str'"""
-    cw.output_traceback(tb)
+    cw.write_traceback(tb)
 
     captured = capsys.readouterr()
     escaped_tb = escape_ansi(captured.err)
@@ -119,7 +119,7 @@ TypeError: unsupported operand type(s) for +: 'int' and 'str'"""
 
 def test_render_last_line(capsys):
     cw = writer.ConsoleWriter()
-    cw.render_last_line(42, "x = hello * 'String'")
+    cw.write_last_line(42, "x = hello * 'String'")
     captured = capsys.readouterr()
     output = escape_ansi(captured.err).strip()
     assert output == "42 || x = hello * 'String'"

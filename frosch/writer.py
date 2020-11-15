@@ -59,7 +59,7 @@ class ConsoleWriter:
         self.python_traceback_lexer = Python3TracebackLexer()
         self.left_offset = None
 
-    def output_traceback(self, traceback_):
+    def write_traceback(self, traceback_):
         """Highlight traceback and write out"""
         self._write_out(highlight(traceback_, self.python_traceback_lexer, self.terminal_formater))
 
@@ -155,7 +155,7 @@ class ConsoleWriter:
 
         return lines
 
-    def render_last_line(self, lineno: int, line: str):
+    def write_last_line(self, lineno: int, line: str):
         """Write out the line which throws runtime error with highlighting"""
         self.write_newline()
         self.left_offset = len(str(lineno))

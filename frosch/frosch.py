@@ -61,12 +61,12 @@ def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: T
 
     with support_windows_colors():
         console_writer = ConsoleWriter()
-        console_writer.output_traceback("".join(formatted_tb))
-        console_writer.render_last_line(last_stack.lineno, line)
+        console_writer.write_traceback("".join(formatted_tb))
+        console_writer.write_last_line(last_stack.lineno, line)
         console_writer.write_debug_tree(variables)
         console_writer.write_newline()
 
-def extract_statement_piece(traceback_: TracebackType, last_stack) -> List[List]:
+def extract_statement_piece(traceback_: TracebackType, last_stack) -> List[List[Token]]:
     """Get frame infos and get code pieces (from stack_data) by line
     of crash """
     frame_info = stack_data.FrameInfo(traceback_)
@@ -81,7 +81,7 @@ def extract_statement_piece(traceback_: TracebackType, last_stack) -> List[List]
 
     return statement_piece_tokens
 
-def extract_source_code(tokens: List[List]) -> str:
+def extract_source_code(tokens: List[List[Token]]) -> str:
     """Get all strings of the tokens and flatten into on list"""
     statement_line = []
     for line_tokens in tokens:
@@ -104,7 +104,7 @@ def debug_variables(variables: List[Variable], locals_: dict, globals_: dict) ->
     return variables
 
 
-def parse_error_line(line: str):
+def parse_error_line(line: str) -> List[Variable]:
     """Parse a line of python code and extract all (variable) names from it"""
     variables = []
     try:
@@ -124,69 +124,6 @@ def parse_error_line(line: str):
         if isinstance(node, ast.Name):
             variables.append(Variable(node.id, node.col_offset))
     return variables
-
-def find_next_parseable_statment(stack: FrameSummary, traceback_: TracebackType) -> str:
-    """If we handling multiline statements we have to look both ways (up and down)
-    to find the whole statement. We therefore incrementally go up and down the
-    lines and add them to the current line while the single line is not parseable
-
-    Note:
-        This is not working on all cases, e.g if multiline statement
-        contains lines, which are "parsable" on their own
-        x = (
-            # This line is parsable on its own
-            1 +
-            "String"
-        )
-
-    """
-    source_lines = inspect.getsourcelines(traceback_)[0]
-
-    current_lines = [source_lines[stack.lineno].strip()]
-
-    current_line_before = stack.lineno - 1
-    current_line_after = stack.lineno + 1
-
-    found_parseable_line_before = False
-    found_parseable_line_after = False
-
-    while True:
-
-        # Check line before
-        if current_line_before >= 0:
-            if is_parsable(source_lines[current_line_before]):
-                found_parseable_line_before = True
-            else:
-                current_lines.insert(0, source_lines[current_line_before].strip())
-                current_line_before -= 1
-        else:
-            found_parseable_line_before = True
-
-        # Check line after
-        if not current_line_after >= len(source_lines):
-
-            if is_parsable(source_lines[current_line_after]):
-                found_parseable_line_after = True
-            else:
-                current_lines.append(source_lines[current_line_after].strip())
-                current_line_after += 1
-        else:
-            found_parseable_line_after = True
-
-        # If both are parsable return
-        if found_parseable_line_after and found_parseable_line_before:
-            parsable_line = " ".join(current_lines)
-            if is_parsable(parsable_line):
-                return parsable_line
-            raise ParseError("Could not parse mutiline statement: {}".format(parsable_line))
-
-def is_parsable(line: str) -> bool:
-    """Test if a line of python is parsable or not"""
-    try:
-        ast.parse(line.strip())
-    except SyntaxError:
-        return False
-    return True
 
 def retrieve_post_mortem_stack_infos(traceback_: TracebackType):
     """Retrieve post mortem all local and global
