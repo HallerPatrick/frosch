@@ -28,6 +28,7 @@ import stack_data
 
 from .writer import ConsoleWriter, Variable
 
+
 class ParseError(Exception):
     """Thrown in crashing line cannot be parsed with ast.parse"""
 
@@ -38,8 +39,11 @@ def support_windows_colors():
     yield
     deinit()
 
-def hook():
+def hook(theme: str = "monokai"):
     """Overwrite sys.excepthook and make sure windows color work too"""
+
+    # Don't want global vars
+    pytrace_excepthook.theme = theme
     sys.excepthook = pytrace_excepthook
 
 def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: TracebackType=None):
@@ -60,7 +64,7 @@ def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: T
     variables = debug_variables(names, locals_, globals_)
 
     with support_windows_colors():
-        console_writer = ConsoleWriter()
+        console_writer = ConsoleWriter(pytrace_excepthook.theme)
         console_writer.write_traceback("".join(formatted_tb))
         console_writer.write_last_line(last_stack.lineno, line)
         console_writer.write_debug_tree(variables)
