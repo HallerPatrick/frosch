@@ -13,14 +13,12 @@
 import ast
 import sys
 import traceback
-from traceback import FrameSummary
 from bdb import Bdb
 import builtins
 from contextlib import contextmanager
 from collections import ChainMap
-import inspect
 from types import TracebackType
-from typing import List 
+from typing import List
 
 from asttokens.util import Token
 from colorama import deinit, init
@@ -93,7 +91,7 @@ def extract_source_code(tokens: List[List[Token]]) -> str:
             string = token.string
             if not string.strip() == "":
                 statement_line.append(string.strip())
-    
+
     return " ".join(statement_line)
 
 def debug_variables(variables: List[Variable], locals_: dict, globals_: dict) -> List[Variable]:
