@@ -2,7 +2,7 @@ import sys
 
 import unittest
 from unittest import TestCase
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, PropertyMock
 
 import pytest
 
@@ -11,10 +11,6 @@ from frosch import frosch
 
 
 class TestFrosch(TestCase):
-
-
-    def setUp(self):
-        pass
 
 
     def test_hook_attached(self):
@@ -72,131 +68,67 @@ class TestFrosch(TestCase):
             ]
         self.assertCountEqual(result, expected_result)
 
-
     def test_parse_error_line_multiline_throw_error(self):
         line = "x = ( y"
 
         with pytest.raises(frosch.ParseError):
             frosch.parse_error_line(line)
 
-    def test_find_next_parseable_statement(self):
-        with patch("inspect.getsourcelines") as getsourcelines_mock:
-            getsourcelines_mock.return_value = (
-                [
-                    "1+1",
-                    "x = (",
-                    "1",
-                    "+ z)",
-                    "2 + 2"
-                ], 0
+    def test_parse_error_indentation_case(self):
+        line = "for i in range(10):"
+        result = frosch.parse_error_line(line)
+        expected_result = [
+            frosch.Variable("i", 4),
+            frosch.Variable("range", 9)
+        ]
+
+        self.assertCountEqual(result, expected_result)
+
+
+    @unittest.skip("Not working yet")
+    def test_extract_statement_piece(self):
+        """Check if collection of pieces/token from list is working"""
+        last_stack_mock = Mock()
+        last_stack_mock.lineno = 12
+        with patch.object(frosch.stack_data, "FrameInfo") as frame_info_mock:
+            frame_info_mock.executing = Mock()
+            frame_info_mock.executing.source = Mock()
+            type(frame_info_mock.executing.source).pieces = PropertyMock(
+                return_value=[range(0, 2), range(3, 7), range(11, 12)]
             )
-            stack_mock = Mock()
-            stack_mock.line = "x = ("
-            stack_mock.lineno = 2
+            frame_info_mock.source.tokens_by_lineno = {
+                0: None,
+                2: None,
+                11: "target",
+                12: "target2"
+            }
 
-            result = frosch.find_next_parseable_statment(stack_mock, None)
-            expected_result = "x = ( 1 + z)"
-            self.assertEqual(result, expected_result)
+            traceback_mock = Mock()
 
-    def test_find_next_parseable_statement2(self):
-        source_lines = """
-import sys
-sys.path.append("..")
+            result = frosch.extract_statement_piece(
+                traceback_mock, last_stack_mock
+                )
 
-from frosch.frosch import hook
+            self.assertListEqual(result, ["target", "target2"])
 
-hook()
+    def test_extract_source_code(self):
+        def make_token(val):
+            token = Mock()
+            token.string = val
+            return token 
 
+        tokens = [
+            [
+                make_token("x"),
+                make_token("="),
+                make_token("3")
+            ]
+        ]
 
-def hello():
-    y = "Some String"
-    z = [1, 2, "hel"]
-    index = 0
-    i = "Other string"
-    x = ( 
-        1 + 
-        z)
+        result = frosch.extract_source_code(tokens)
 
+        self.assertEqual(result, "x = 3")
 
-def num():
-    return 3
-
-
-hello()
-
-"""
-        with patch("inspect.getsourcelines") as getsourcelines_mock:
-            getsourcelines_mock.return_value = (
-                source_lines.split("\n")
-                , 0
-            )
-            stack_mock = Mock()
-            stack_mock.line = "1 +"
-            stack_mock.lineno = 15 
-
-            result = frosch.find_next_parseable_statment(stack_mock, None)
-            expected_result = "x = ( 1 + z)"
-            self.assertEqual(result, expected_result)
-
-    def test_get_whole_expression(self):
-
-        with patch("inspect.getsourcelines") as getsourcelines_mock:
-            getsourcelines_mock.return_value = (
-                [
-                    "x = (y",
-                    "+ 1",
-                    "+ z)"
-                ], 0
-            )
-            stack_mock = Mock()
-            stack_mock.line = "x = (y"
-            stack_mock.lineno = 1
-
-            result = frosch.find_next_parseable_statment(stack_mock, None)
-            expected_result = "x = (y + 1 + z)"
-            self.assertEqual(result, expected_result)
-
-    def test_get_whole_expression2(self):
-
-        with patch("inspect.getsourcelines") as getsourcelines_mock:
-            multi_line = [
-                    "x = (",
-                    "    y + "
-                    "z)"
-                ]
-            getsourcelines_mock.return_value = (
-                multi_line, 0
-            )
-            stack_mock = Mock()
-            stack_mock.line = multi_line[0]
-            stack_mock.lineno = 1
-
-            result = frosch.find_next_parseable_statment(stack_mock, None)
-            expected_result = "x = ( y + z)"
-            self.assertEqual(result, expected_result)
-
-    def test_get_whole_expression_syntax_error(self):
-
-        with patch("inspect.getsourcelines") as getsourcelines_mock:
-            getsourcelines_mock.return_value = (
-                [
-                    "x = (y",
-                    "+ 1",
-                ], 0
-            )
-            stack_mock = Mock()
-            stack_mock.line = "x = (y"
-            stack_mock.lineno = 1
-            with pytest.raises(frosch.ParseError):
-                frosch.find_next_parseable_statment(stack_mock, None)
-
-    def test_is_parsable_true(self):
-        result = frosch.is_parsable("x = 3")
-        self.assertTrue(result)
-
-    def test_is_parsable_false(self):
-        result = frosch.is_parsable("asd3 = (")
-        self.assertFalse(result)
 
     def test_retrieve_post_mortem_stack_infos(self):
         with patch("bdb.Bdb.get_stack") as get_stack_mock:
@@ -224,8 +156,8 @@ hello()
         def custom_hook(error_type, error_message, tb):
             # Mock console writer to check if called correctly
             frosch.ConsoleWriter = Mock()
-            frosch.ConsoleWriter.output_traceback = Mock()
-            frosch.ConsoleWriter.render_last_line = Mock()
+            frosch.ConsoleWriter.write_traceback = Mock()
+            frosch.ConsoleWriter.write_last_line = Mock()
             frosch.ConsoleWriter.write_debug_tree = Mock()
             frosch.ConsoleWriter.write_newlines = Mock()
 

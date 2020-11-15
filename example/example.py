@@ -13,7 +13,10 @@ def hello():
     z = [1, 2, "hel"]
     index = 0
     i = "Other string"
-    fails()
 
+    x = ( 
+
+        1 +
+        z)
 
 hello()
