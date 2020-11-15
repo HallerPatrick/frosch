@@ -7,7 +7,7 @@ from lib import fails
 
 
 def hello():
-    hook(theme="vs")
+    hook(theme="monokai")
 
     y = "Some String"
     z = [1, 2, "hel"]

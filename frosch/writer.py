@@ -75,11 +75,11 @@ class ConsoleWriter:
         """Import the according theme from pygments"""
         pygment_styles_module = "pygments.styles.{}.{}Style".format(
             theme_string, theme_string.capitalize()
-        ) 
+        )
 
         pygment_styles_module = "pygments.styles.{}".format(
             theme_string
-        ) 
+        )
 
         style_class = "{}Style".format(ConsoleWriter._capitalize_theme(theme_string))
 
@@ -108,7 +108,7 @@ https://github.com/HallerPatrick/frosch#configuration for more infos."
         # Use this if we only support 3.7 >
         # if theme := ConsoleWriter._get_special_themes(theme_string):
         #    return theme
-        
+
         theme = ConsoleWriter._get_special_themes(theme_string)
         if theme:
             return theme
@@ -119,7 +119,7 @@ https://github.com/HallerPatrick/frosch#configuration for more infos."
         return theme_string.replace(" ", "_")
 
     @staticmethod
-    def _get_special_themes(theme_string: str) -> Optional[str]:
+    def _get_special_themes(theme_string: str) -> Optional[str]: # pylint: disable=E1136
         """Some theme names cannot be converted programmaticaly
         (or is just to much time to catch all cases), there
         map theme manually"""
