@@ -13,7 +13,7 @@ It lacks some color and more debug information!
 Get some good looking error tracebacks and beautifuly formatted
 last line with all its last values *before* you crashed the program.
 
-<h1 align="center">
+<h1 align="center" style="padding-left: 20px; padding-right: 20px">
   <img src="showcase.png">
 </h1>
 
@@ -22,7 +22,6 @@ last line with all its last values *before* you crashed the program.
 
 ```bash
 $ pip install frosch
-
 ```
 
 ## Usage 
@@ -55,7 +54,7 @@ $ poetry install
 ### Run tests
 
 ```python
-$ python -m pylint tests
+$ python -m pytest tests
 ```
 2 months ago
 
@@ -64,39 +63,22 @@ $ python -m pylint tests
 ## Themes
 
 frosch allows to use different themes for styling the output:
-```
-abap
-algol
-algol_nu
-arduino
-autumn
-borland
-bw
-colorful
-default
-emacs
-friendly
-fruity
-igor
-inkpot
-lovelace
-manni
-monokai
-murphy
-native
-paraiso_dark
-paraiso_light
-pastie
-perldoc
-rainbow_dash
-rrt
-sas
-solarized
-stata_dark
-stata_light
-tango
-trac
-vim
-vs
-xcode
-```
+
+| Themes   |          |          |               |             |      |
+|----------|----------|----------|---------------|-------------|------|
+| abap     | bw       | igor     | native        | rrt         | trac |
+| algol    | colorful | inkpot   | paraiso_dark  | sas         | vim  |
+| algol_nu | default  | lovelace | paraiso_light | solarized   | vs   |
+| arduino  | emacs    | manni    | pastie        | stata_dark  | xcod |
+| autumn   | friendly | monokai  | perldoc       | stata_light |      |
+| borland  | fruity   | murphy   | rainbow_dash  | tango       |      |
+
+Usage:
+
+```pyton
+
+from frosch import hook
+
+hook(theme="vim")
+
+````
