@@ -10,17 +10,22 @@
 
 """
 
+import importlib
+import string
 import sys
-from typing import Any, List
+from typing import Any, List, Optional
 
 import colorama
 from pygments import highlight
 from pygments.formatters.terminal256 import Terminal256Formatter
 from pygments.lexers.python import Python3Lexer, Python3TracebackLexer
-from pygments.styles.monokai import MonokaiStyle
+# from pygments.styles.monokai import MonokaiStyle
 
 class WrongWriteOrder(Exception):
     """Thrown when the correct order of parts to be written to stderr is not correct"""
+
+class ThemeNotExistsError(Exception):
+    """Thrown when trying to import a theme from pygments which does not exist"""
 
 class Variable:
     """Dataclass for a variable in error throwing line of program"""
@@ -52,9 +57,11 @@ class Variable:
 class ConsoleWriter:
     """Handles formatting, highlighting and writing to output of error message"""
 
-    def __init__(self):
+    def __init__(self, theme):
         self.stderr = sys.stderr
-        self.terminal_formater = Terminal256Formatter(style=MonokaiStyle)
+        self.terminal_formater = Terminal256Formatter(
+            style=ConsoleWriter._get_theme_from_string(theme)
+        )
         self.python_lexer = Python3Lexer()
         self.python_traceback_lexer = Python3TracebackLexer()
         self.left_offset = None
@@ -62,6 +69,76 @@ class ConsoleWriter:
     def output_traceback(self, traceback_):
         """Highlight traceback and write out"""
         self._write_out(highlight(traceback_, self.python_traceback_lexer, self.terminal_formater))
+
+    @staticmethod
+    def _get_theme_from_string(theme_string: str):
+        """Import the according theme from pygments"""
+        pygment_styles_module = "pygments.styles.{}.{}Style".format(
+            theme_string, theme_string.capitalize()
+        )
+
+        pygment_styles_module = "pygments.styles.{}".format(
+            theme_string
+        )
+
+        style_class = "{}Style".format(ConsoleWriter._capitalize_theme(theme_string))
+
+        try:
+            pygment_styles_module = importlib.import_module(pygment_styles_module)
+            pygment_style_class = getattr(
+                pygment_styles_module,
+                style_class
+            )
+            return pygment_style_class
+        except ImportError as import_error:
+            raise ThemeNotExistsError("Theme: '{}' does not exists.\nPlease check \
+https://github.com/HallerPatrick/frosch#configuration for more infos."
+                .format(theme_string)) from import_error
+        except AttributeError as attr_error:
+            raise ThemeNotExistsError(
+                "Could not find style '{}' in module '{}'".format(
+                    style_class, pygment_styles_module
+                )
+            ) from attr_error
+
+    @staticmethod
+    def _capitalize_theme(theme_string: str) -> str:
+        """Capitalize the theme correctly for import from pygments"""
+
+        # Use this if we only support 3.7 >
+        # if theme := ConsoleWriter._get_special_themes(theme_string):
+        #    return theme
+
+        theme = ConsoleWriter._get_special_themes(theme_string)
+        if theme:
+            return theme
+
+        if "_" in theme_string:
+            theme_string = theme_string.replace("_", " ")
+        theme_string = string.capwords(theme_string)
+        return theme_string.replace(" ", "_")
+
+    @staticmethod
+    def _get_special_themes(theme_string: str) -> Optional[str]: # pylint: disable=E1136
+        """Some theme names cannot be converted programmaticaly
+        (or is just to much time to catch all cases), there
+        map theme manually"""
+
+        themes = {
+            "bw": "BlackWhite",
+            "vs": "VisualStudio",
+            "inkpot": "InkPot",
+            "paraiso_dark": "ParaisoDark",
+            "paraiso_light": "ParaisoLight",
+            "rainbow_dash": "RainbowDash",
+            "solarized": "SolarizedDark", # Just use dark for now
+            "stata_dark": "StataDark",
+            "stata_light": "StataLight"
+        }
+
+        if theme_string in themes:
+            return themes[theme_string]
+        return None
 
     @staticmethod
     def offset_vert_lines(offsets) -> str:

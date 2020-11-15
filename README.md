@@ -57,3 +57,46 @@ $ poetry install
 ```python
 $ python -m pylint tests
 ```
+2 months ago
+
+# Configuration
+
+## Themes
+
+frosch allows to use different themes for styling the output:
+```
+abap
+algol
+algol_nu
+arduino
+autumn
+borland
+bw
+colorful
+default
+emacs
+friendly
+fruity
+igor
+inkpot
+lovelace
+manni
+monokai
+murphy
+native
+paraiso_dark
+paraiso_light
+pastie
+perldoc
+rainbow_dash
+rrt
+sas
+solarized
+stata_dark
+stata_light
+tango
+trac
+vim
+vs
+xcode
+```
