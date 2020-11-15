@@ -75,10 +75,8 @@ frosch allows to use different themes for styling the output:
 
 Usage:
 
-```pyton
-
+```python
 from frosch import hook
 
 hook(theme="vim")
-
 ````
