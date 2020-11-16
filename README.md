@@ -39,24 +39,6 @@ x = 3 + "String"
 
 ```
 
-## Contribution
-
-`frosch` uses [poetry](https://github.com/python-poetry/poetry) for build and dependency
-management, so please install beforehand.
-
-### Setup
-
-```bash
-$ git clone https://github.com/HallerPatrick/frosch.git
-$ poetry install
-```
-
-### Run tests
-
-```python
-$ python -m pytest tests
-```
-2 months ago
 
 # Configuration
 
@@ -69,7 +51,7 @@ frosch allows to use different themes for styling the output:
 | abap     | bw       | igor     | native        | rrt         | trac |
 | algol    | colorful | inkpot   | paraiso_dark  | sas         | vim  |
 | algol_nu | default  | lovelace | paraiso_light | solarized   | vs   |
-| arduino  | emacs    | manni    | pastie        | stata_dark  | xcod |
+| arduino  | emacs    | manni    | pastie        | stata_dark  | xcode |
 | autumn   | friendly | monokai  | perldoc       | stata_light |      |
 | borland  | fruity   | murphy   | rainbow_dash  | tango       |      |
 
@@ -81,13 +63,15 @@ from frosch import hook
 hook(theme="vim")
 ````
 
-# OS Notifications
+## OS Notifications
 
 But wait there is more!
 
 Running longer scripts in the background?
 
-Just add a title and/or message to the hook and it will you give a notification when your program is crashing.
+Just add a title and/or message to the hook and it will you give a notification when your program 
+is crashing.
+
 
 ```python
 
@@ -98,4 +82,26 @@ hook(
   title="I crashed!",
   message="Run Number #1444 is also crashing..."
 )
+```
+
+This works on MacOS (`osascript`), Linux (`notify-send`) and Windows (`powershell`). 
+
+
+
+# Contribution
+
+`frosch` uses [poetry](https://github.com/python-poetry/poetry) for build and dependency
+management, so please install beforehand.
+
+## Setup
+
+```bash
+$ git clone https://github.com/HallerPatrick/frosch.git
+$ poetry install
+```
+
+## Run tests
+
+```python
+$ python -m pytest tests
 ```
