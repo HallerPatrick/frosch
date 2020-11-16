@@ -3,9 +3,9 @@
 [![PyPI version](https://badge.fury.io/py/frosch.svg)](https://badge.fury.io/py/frosch)
 ![Codecov](https://img.shields.io/codecov/c/github/HallerPatrick/frosch)
 
-Better runtime error messages 
+Better runtime error messages
 
-Are you also constantly seeing the runtime error message the 
+Are you also constantly seeing the runtime error message the
 python interpreter is giving you?
 It lacks some color and more debug information!
 
@@ -24,7 +24,7 @@ last line with all its last values *before* you crashed the program.
 $ pip install frosch
 ```
 
-## Usage 
+## Usage
 
 
 Call the hook function at the beginning of your program.
@@ -99,13 +99,3 @@ hook(
   message="Run Number #1444 is also crashing..."
 )
 ```
-
-
-<h2 align="center" style="padding-left: 40px; padding-right: 40px">
-  <p>Mac Notification</p>
-  <img src="resources/notify_mac.png">
-  <p>Linux Notification</p>
-  <img src="resources/notify_mac.png">
-  <p>Windows Notification</p>
-  <img src="resources/notify_mac.png">
-</h2>
