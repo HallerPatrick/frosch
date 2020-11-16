@@ -80,3 +80,22 @@ from frosch import hook
 
 hook(theme="vim")
 ````
+
+# OS Notifications
+
+But wait there is more!
+
+Running longer scripts in the background?
+
+Just add a title and/or message to the hook and it will you give a notification when your program is crashing.
+
+```python
+
+from frosch import hook
+
+hook(
+  theme="vs", # VSCode Theme
+  title="I crashed!",
+  message="Run Number #1444 is also crashing..."
+)
+```
