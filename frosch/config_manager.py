@@ -44,7 +44,7 @@ class ConfigManager:
         return self._theme
 
     @theme.setter
-    def theme(self, theme):
+    def theme(self, theme: str):
         self._theme = ConfigManager._get_theme_from_string(theme)
 
     @staticmethod

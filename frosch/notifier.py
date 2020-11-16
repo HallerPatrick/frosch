@@ -29,9 +29,7 @@ def linux_notify(title: str, message: str) -> str:
 
 def windows_notify(title: str, message: str) -> str:
     """Display notification for Windows systems"""
-    # TODO: Test this
-    # http://woshub.com/popup-notification-powershell/
-    command = f'''$wshell = New-Object -ComObject Wscript.Shell
-$Output = $wshell.Popup("{message}", 0, "{title}", 0)'''
-    return command
+    command = f'''powershell -command "$wshell = New-Object -ComObject Wscript.Shell;\
+    $wshell.Popup('{message}', 64, '{title}', 0)" '''
+    return command 
 
