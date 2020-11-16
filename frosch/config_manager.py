@@ -1,3 +1,14 @@
+"""
+
+    frosch - Better runtime errors
+
+    Patrick Haller
+    betterthannothing.blog
+    patrickhaller40@googlemail.com
+
+    License MIT
+
+"""
 import importlib
 import string
 from typing import Optional
@@ -14,8 +25,9 @@ class ConfigManager:
         self._theme = None
 
     def set_notifier(self, title: str, message: str):
+        """Setter for notifcation message"""
+        self.title = title
         self.message = message
-        self.title = message
 
     def has_notifier(self):
         """Returns True if message and/or title is set"""
@@ -27,24 +39,28 @@ class ConfigManager:
             return True
         return False
 
-    def _from_kwargs(self, **kwargs):
-        for k, v in kwargs.items():
-            if hasattr(self, k):
-                self.__setattr__(k, v)
+    def from_kwargs(self, **kwargs):
+        """Set all given kwargs as attributes, if attr exists"""
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                self.__setattr__(key, value)
         return self
 
     @classmethod
-    def _default(cls):
+    def default(cls):
+        """Constructor with default values"""
         _cls = cls()
         _cls.theme = "monokai"
         return _cls
 
     @property
     def theme(self):
+        """Returns theme object of pygments"""
         return self._theme
 
     @theme.setter
     def theme(self, theme: str):
+        """Sets theme object of pygments for given string"""
         self._theme = ConfigManager._get_theme_from_string(theme)
 
     @staticmethod

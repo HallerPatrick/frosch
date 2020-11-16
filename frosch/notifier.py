@@ -1,3 +1,15 @@
+"""
+
+    frosch - Better runtime errors
+
+    Patrick Haller
+    betterthannothing.blog
+    patrickhaller40@googlemail.com
+
+    License MIT
+
+"""
+
 import platform
 import os
 
@@ -20,10 +32,9 @@ def mac_notify(title: str, message: str) -> str:
     """Display notification for MacOS systems"""
     command = f'''osascript -e 'display notification "{message}" with title "{title}"' '''
     return command
-    
+
 def linux_notify(title: str, message: str) -> str:
     """Display notification for Linux systems"""
-    # TODO: Test this
     command = f'''notify-send "{title}" "{message}"'''
     return command
 
@@ -31,5 +42,4 @@ def windows_notify(title: str, message: str) -> str:
     """Display notification for Windows systems"""
     command = f'''powershell -command "$wshell = New-Object -ComObject Wscript.Shell;\
     $wshell.Popup('{message}', 64, '{title}', 0)" '''
-    return command 
-
+    return command

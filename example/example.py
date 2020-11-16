@@ -8,15 +8,16 @@ from lib import fails
 
 def hello():
     hook(theme="emacs", message="LOL", title="ITS DONE")
-
     y = "Some String"
     z = [1, 2, "hel"]
     index = 0
     i = "Other string"
 
-    x = ( 
+    x = (
 
         1 +
         z)
+
+
 
 hello()
