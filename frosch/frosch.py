@@ -11,6 +11,7 @@
 """
 
 import ast
+import linecache
 import sys
 import traceback
 from bdb import Bdb
@@ -22,7 +23,7 @@ from typing import List
 
 from asttokens.util import Token
 from colorama import deinit, init
-import stack_data
+from stack_data import Source
 
 from .config_manager import ConfigManager
 from .notifier import notify_os
@@ -58,23 +59,33 @@ def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: T
     """New excepthook to overwrite sys.excepthook"""
     configs = pytrace_excepthook.configs
 
-    traceback_entries = traceback.extract_tb(traceback_)
-    formatted_tb = traceback.format_exception(error_type, error_message, traceback_)
+    # Get last stack where crash occured
+    last_stack = traceback.extract_tb(traceback_)[-1]
 
-    locals_, globals_ = retrieve_post_mortem_stack_infos(traceback_)
+    # Get the source of the last stack
+    source = Source(last_stack.filename, linecache.getlines(last_stack.filename))
 
-    last_stack = traceback_entries[-1]
+    # Extract all relevant parts
+    tokens = extrace_statement_from_source(source, last_stack)
 
-    tokens = extract_statement_piece(traceback_, last_stack)
+    # Format into one line
     line = extract_source_code(tokens)
 
+    # Parse to get all names
     names = parse_error_line(line)
 
+    # Retrieve locals and globals from the dead
+    locals_, globals_ = retrieve_post_mortem_stack_infos(traceback_)
+
+    # Get all variables and values
     variables = debug_variables(names, locals_, globals_)
 
+    # Write down
     with support_windows_colors():
         console_writer = ConsoleWriter(configs.theme)
-        console_writer.write_traceback("".join(formatted_tb))
+        console_writer.write_traceback(
+            "".join(traceback.format_exception(error_type, error_message, traceback_))
+        )
         console_writer.write_last_line(last_stack.lineno, line)
         console_writer.write_debug_tree(variables)
         console_writer.write_newline()
@@ -82,12 +93,11 @@ def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: T
     if configs.has_notifier():
         notify_os(configs.title, configs.message)
 
-def extract_statement_piece(traceback_: TracebackType, last_stack) -> List[List[Token]]:
+def extrace_statement_from_source(source: Source, last_stack) -> List[List[Token]]:
     """Get frame infos and get code pieces (from stack_data) by line
     of crash """
-    frame_info = stack_data.FrameInfo(traceback_)
-    pieces = frame_info.executing.source.pieces
-    tokens = frame_info.executing.source.tokens_by_lineno
+    pieces = source.pieces
+    tokens = source.tokens_by_lineno
 
     statement_piece_tokens = []
     for piece in pieces:
