@@ -10,16 +10,13 @@
 
 """
 
-import importlib
-import string
 import sys
-from typing import Any, List, Optional
+from typing import Any, List
 
 import colorama
 from pygments import highlight
 from pygments.formatters.terminal256 import Terminal256Formatter
 from pygments.lexers.python import Python3Lexer, Python3TracebackLexer
-# from pygments.styles.monokai import MonokaiStyle
 
 class WrongWriteOrder(Exception):
     """Thrown when the correct order of parts to be written to stderr is not correct"""

@@ -43,9 +43,9 @@ def support_windows_colors():
 def hook(**kwargs):
     """Initialize configurations for frosch and set hook"""
     if kwargs:
-        config_manager = ConfigManager._default()._from_kwargs(**kwargs)
+        config_manager = ConfigManager.default().from_kwargs(**kwargs)
     else:
-        config_manager = ConfigManager._default()
+        config_manager = ConfigManager.default()
 
     pytrace_excepthook.configs = config_manager
     _hook()
