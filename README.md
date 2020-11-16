@@ -14,7 +14,7 @@ Get some good looking error tracebacks and beautifuly formatted
 last line with all its last values *before* you crashed the program.
 
 <h1 align="center" style="padding-left: 20px; padding-right: 20px">
-  <img src="showcase.png">
+  <img src="resources/showcase.png">
 </h1>
 
 
@@ -99,3 +99,13 @@ hook(
   message="Run Number #1444 is also crashing..."
 )
 ```
+
+
+<h2 align="center" style="padding-left: 40px; padding-right: 40px">
+  <p>Mac Notification</p>
+  <img src="resources/notify_mac.png">
+  <p>Linux Notification</p>
+  <img src="resources/notify_mac.png">
+  <p>Windows Notification</p>
+  <img src="resources/notify_mac.png">
+</h2>
