@@ -84,6 +84,15 @@ class TestFrosch(TestCase):
 
         self.assertCountEqual(result, expected_result)
 
+    def test_parse_error_indentation_case2(self):
+        line = "if(x == 3):"
+        result = frosch.parse_error_line(line)
+        expected_result = [
+            frosch.Variable("x", 3),
+        ]
+
+        self.assertCountEqual(result, expected_result)
+
     @unittest.skip("Not working yet")
     def test_extract_statement_piece(self):
         """Check if collection of pieces/token from list is working"""

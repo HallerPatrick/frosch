@@ -91,55 +91,6 @@ class TestConsoleWriter(TestCase):
             self.cw.write_debug_tree([])
 
 
-    def test__get_theme_from_string(self):
-        themes = [
-            "abap",
-            "algol",
-            "algol_nu",
-            "arduino",
-            "autumn",
-            "borland",
-            "bw",
-            "colorful",
-            "default",
-            "emacs",
-            "friendly",
-            "fruity",
-            "igor",
-            "inkpot",
-            "lovelace",
-            "manni",
-            "monokai",
-            "murphy",
-            "native",
-            "paraiso_dark",
-            "paraiso_light",
-            "pastie",
-            "perldoc",
-            "rainbow_dash",
-            "rrt",
-            "sas",
-            "solarized",
-            "stata_dark",
-            "stata_light",
-            "tango",
-            "trac",
-            "vim",
-            "vs",
-            "xcode"
-        ]
-        for theme in themes:
-            writer.ConsoleWriter(theme)
-
-    def test_capitalize_theme(self):
-        """Most testing done with testing _get_theme_from_string"""
-        writer.ConsoleWriter._get_theme_from_string("vs")
-
-    def test__get_theme_from_string_not_found(self):
-        with pytest.raises(writer.ThemeNotExistsError):
-            writer.ConsoleWriter._get_theme_from_string("not existing")
-
-
 # https://stackoverflow.com/questions/14693701/how-can-i-remove-the-ansi-escape-sequences-from-a-string-in-python
 def escape_ansi(line):
     ansi_escape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')

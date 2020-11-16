@@ -3,9 +3,9 @@
 [![PyPI version](https://badge.fury.io/py/frosch.svg)](https://badge.fury.io/py/frosch)
 ![Codecov](https://img.shields.io/codecov/c/github/HallerPatrick/frosch)
 
-Better runtime error messages 
+Better runtime error messages
 
-Are you also constantly seeing the runtime error message the 
+Are you also constantly seeing the runtime error message the
 python interpreter is giving you?
 It lacks some color and more debug information!
 
@@ -14,7 +14,7 @@ Get some good looking error tracebacks and beautifuly formatted
 last line with all its last values *before* you crashed the program.
 
 <h1 align="center" style="padding-left: 20px; padding-right: 20px">
-  <img src="showcase.png">
+  <img src="resources/showcase.png">
 </h1>
 
 
@@ -24,7 +24,7 @@ last line with all its last values *before* you crashed the program.
 $ pip install frosch
 ```
 
-## Usage 
+## Usage
 
 
 Call the hook function at the beginning of your program.
@@ -80,3 +80,22 @@ from frosch import hook
 
 hook(theme="vim")
 ````
+
+# OS Notifications
+
+But wait there is more!
+
+Running longer scripts in the background?
+
+Just add a title and/or message to the hook and it will you give a notification when your program is crashing.
+
+```python
+
+from frosch import hook
+
+hook(
+  theme="vs", # VSCode Theme
+  title="I crashed!",
+  message="Run Number #1444 is also crashing..."
+)
+```
