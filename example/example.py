@@ -7,8 +7,7 @@ from lib import fails
 
 
 def hello():
-    hook(theme="monokai")
-
+    hook()
     y = "Some String"
     z = [1, 2, "hel"]
     index = 0
@@ -18,5 +17,7 @@ def hello():
 
         1 +
         z)
+
+
 
 hello()
