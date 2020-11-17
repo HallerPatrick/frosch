@@ -24,6 +24,7 @@ from typing import List
 from asttokens.util import Token
 from colorama import deinit, init
 from stack_data import Source
+from yapf.yapflib.yapf_api import FormatCode
 
 from .config_manager import ConfigManager
 from .notifier import notify_os
@@ -55,11 +56,60 @@ def _hook():
     # Don't want global vars
     sys.excepthook = pytrace_excepthook
 
+def print_exception(exception: Exception):
+    """Pretty print the exception and traceback to stdout"""
+    last_stack, line = get_last_stack(exception.__traceback__)
+    line = format_line(line)
+
+    variables = get_vars_from_tb(exception.__traceback__, line)
+
+    config_manager = ConfigManager.default()
+
+    # Do we even need exception as param?
+    error_type, error_message, traceback_ = sys.exc_info()
+
+    with support_windows_colors():
+
+        console_writer = ConsoleWriter(config_manager.theme, sys.stdout)
+        console_writer.write_traceback(
+            "".join(traceback.format_exception(
+                error_type,
+                error_message,
+                traceback_
+                )
+            )
+        )
+        console_writer.write_last_line(last_stack.lineno, line)
+        console_writer.write_debug_tree(variables)
+        console_writer.write_newline()
+
+
 def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: TracebackType=None):
     """New excepthook to overwrite sys.excepthook"""
     configs = pytrace_excepthook.configs
 
-    # Get last stack where crash occured
+    last_stack, line = get_last_stack(traceback_)
+
+    line = format_line(line)
+
+    variables = get_vars_from_tb(traceback_, line)
+
+    # Write down
+    with support_windows_colors():
+        console_writer = ConsoleWriter(configs.theme, sys.stderr)
+        console_writer.write_traceback(
+            "".join(traceback.format_exception(error_type, error_message, traceback_))
+        )
+        console_writer.write_last_line(last_stack.lineno, line)
+        console_writer.write_debug_tree(variables)
+        console_writer.write_newline()
+
+    if configs.has_notifier():
+        notify_os(configs.title, configs.message)
+
+def get_last_stack(traceback_: TracebackType):
+    """Get the last stack and a new formated line of the last crashing line"""
+    # Get last stack where crash occuredtrace
     last_stack = traceback.extract_tb(traceback_)[-1]
 
     # Get the source of the last stack
@@ -71,6 +121,11 @@ def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: T
     # Format into one line
     line = extract_source_code(tokens)
 
+    return last_stack, line.strip()
+
+def get_vars_from_tb(traceback_: TracebackType, line: str) -> List[Variable]:
+    """Extract all variables from a line and a given traceback"""
+
     # Parse to get all names
     names = parse_error_line(line)
 
@@ -80,18 +135,7 @@ def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: T
     # Get all variables and values
     variables = debug_variables(names, locals_, globals_)
 
-    # Write down
-    with support_windows_colors():
-        console_writer = ConsoleWriter(configs.theme)
-        console_writer.write_traceback(
-            "".join(traceback.format_exception(error_type, error_message, traceback_))
-        )
-        console_writer.write_last_line(last_stack.lineno, line)
-        console_writer.write_debug_tree(variables)
-        console_writer.write_newline()
-
-    if configs.has_notifier():
-        notify_os(configs.title, configs.message)
+    return variables
 
 def extrace_statement_from_source(source: Source, last_stack) -> List[List[Token]]:
     """Get frame infos and get code pieces (from stack_data) by line
@@ -129,7 +173,6 @@ def debug_variables(variables: List[Variable], locals_: dict, globals_: dict) ->
             pass
     return variables
 
-
 def parse_error_line(line: str) -> List[Variable]:
     """Parse a line of python code and extract all (variable) names from it"""
     variables = []
@@ -140,6 +183,7 @@ def parse_error_line(line: str) -> List[Variable]:
     except IndentationError as error:
         # Case of trying to parse a piece of a statement, like a for loop header
         # Try again with a pass stament
+        print(line)
         tree = ast.parse(line + "pass")
 
     except SyntaxError as error:
@@ -156,6 +200,32 @@ def parse_error_line(line: str) -> List[Variable]:
         if isinstance(node, ast.Name):
             variables.append(Variable(node.id, node.col_offset))
     return variables
+
+def format_line(line: str) -> str:
+    """Try format a source code line"""
+
+    formatted_line = line
+    try:
+        # If we handling multilines this will not be parsed
+        formatted_line, _ =  FormatCode(line)
+
+    except IndentationError as error:
+        # Case of trying to parse a piece of a statement, like a for loop header
+        # Try again with a pass stament
+        formatted_line, _ = FormatCode(line + "pass")
+        formatted_line = formatted_line.replace("pass", "")
+
+    except SyntaxError as error:
+        if error.args[0] == "unexpected EOF while parsing":
+            try:
+                formatted_line, _ = FormatCode(line + "pass")
+                formatted_line = formatted_line.replace("pass", "")
+            except SyntaxError as syntax_error:
+                raise ParseError("Could not parse line: {}".format(line)) from syntax_error
+        else:
+            raise ParseError("Could not parse line: {}".format(line)) from error
+
+    return formatted_line.strip()
 
 def retrieve_post_mortem_stack_infos(traceback_: TracebackType):
     """Retrieve post mortem all local and global

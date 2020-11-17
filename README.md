@@ -26,7 +26,6 @@ $ pip install frosch
 
 ## Usage
 
-
 Call the hook function at the beginning of your program.
 
 ```python
@@ -36,6 +35,22 @@ from frosch import hook
 hook()
 
 x = 3 + "String"
+
+```
+
+### Print Exceptions
+
+You can also easily print your catched exceptions to stdout
+
+```python
+
+from frosch import print_exception
+
+try:
+  x = [0, 1]
+  x[3]
+except IndexError as error:
+  print_exception(error)
 
 ```
 

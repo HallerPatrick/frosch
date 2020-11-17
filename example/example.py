@@ -13,10 +13,12 @@ def hello():
     index = 0
     i = "Other string"
 
-    x = (
+    for i in range(0, "String"):
 
-        1 +
-        z)
+        x = (
+
+            1 +
+            z)
 
 
 
