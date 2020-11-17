@@ -10,7 +10,6 @@
 
 """
 
-import sys
 from typing import Any, List
 
 import colorama
@@ -19,7 +18,7 @@ from pygments.formatters.terminal256 import Terminal256Formatter
 from pygments.lexers.python import Python3Lexer, Python3TracebackLexer
 
 class WrongWriteOrder(Exception):
-    """Thrown when the correct order of parts to be written to stderr is not correct"""
+    """Thrown when the correct order of parts to be written to stream is not correct"""
 
 class Variable:
     """Dataclass for a variable in error throwing line of program"""
@@ -51,8 +50,8 @@ class Variable:
 class ConsoleWriter:
     """Handles formatting, highlighting and writing to output of error message"""
 
-    def __init__(self, theme):
-        self.stderr = sys.stderr
+    def __init__(self, theme, stream):
+        self.stream = stream
         self.terminal_formater = Terminal256Formatter(style=theme)
         self.python_lexer = Python3Lexer()
         self.python_traceback_lexer = Python3TracebackLexer()
@@ -86,14 +85,14 @@ class ConsoleWriter:
         return colorama.Fore.BLUE + "||" + colorama.Style.RESET_ALL
 
     def _write_out(self, message: str):
-        """Write to stderr"""
-        self.stderr.write(message)
-        self.stderr.flush()
+        """Write to stream"""
+        self.stream.write(message)
+        self.stream.flush()
 
     def write_newline(self):
         """Write newline to stderr"""
-        self.stderr.write("\n")
-        self.stderr.flush()
+        self.stream.write("\n")
+        self.stream.flush()
 
 
     def write_debug_tree(self, names: List[Variable]):
