@@ -2,6 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/frosch.svg)](https://badge.fury.io/py/frosch)
 ![Codecov](https://img.shields.io/codecov/c/github/HallerPatrick/frosch)
+![Pytho_Version](https://img.shields.io/pypi/pyversions/frosch)
 
 Better runtime error messages
 
