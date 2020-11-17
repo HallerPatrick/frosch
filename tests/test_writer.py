@@ -5,6 +5,7 @@ from io import StringIO
 from contextlib import contextmanager
 
 from unittest import TestCase
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -50,6 +51,17 @@ class TestVariable(TestCase):
         self.assertEqual(str(variable), "Variable('other_name', 15, 12)")
 
 
+class TestWindowsColorSupport(TestCase):
+
+    def test_support_windows_colors_context_manager(self):
+        with patch.object(writer, "init") as init_mock:
+            with patch.object(writer, "deinit") as deinit_mock:
+                with writer.support_windows_colors():
+                    self.assertTrue(init_mock.called)
+                    self.assertFalse(deinit_mock.called)
+                
+                self.assertTrue(deinit_mock.called)
+
 class TestConsoleWriter(TestCase):
 
     def setUp(self) -> None:
@@ -90,6 +102,33 @@ class TestConsoleWriter(TestCase):
         with pytest.raises(writer.WrongWriteOrder):
             self.cw.write_debug_tree([])
 
+    def test_write_exception(self):
+
+        self.cw.write_traceback = Mock()
+        self.cw.write_last_line = Mock()
+        self.cw.write_debug_tree = Mock()
+        self.cw.write_newline = Mock()
+
+        parsed_exception = Mock()
+        parsed_exception.error_type = "error_type"
+        parsed_exception.error_message = "error_message"
+        parsed_exception.traceback = "traceback"
+        parsed_exception.last_stack = Mock()
+        parsed_exception.last_stack.lineno = 42
+        parsed_exception.line = "line"
+        parsed_exception.variables = "variables"
+
+        with patch("frosch.writer.support_windows_colors") as color_mock:
+            self.cw.write_exception(parsed_exception)
+
+            self.assertTrue(color_mock.called)
+            self.cw.write_traceback.assert_called_once_with("error_type", "error_message", "traceback")
+            self.cw.write_last_line.assert_called_once_with(42, "line")
+            self.cw.write_debug_tree.assert_called_once_with("variables")
+            self.assertTrue(self.cw.write_newline.called)
+
+
+
 
 # https://stackoverflow.com/questions/14693701/how-can-i-remove-the-ansi-escape-sequences-from-a-string-in-python
 def escape_ansi(line):
@@ -105,21 +144,28 @@ def test_write_out(capsys):
 
 def test_output_traceback_no_formatting_applied(capsys):
     cw = writer.ConsoleWriter("emacs", sys.stderr)
-    cw.write_traceback("Hello")
-    captured = capsys.readouterr()
-    assert captured.err == "Hello\n"
+    with patch.object(
+        writer.traceback, "format_exception", return_value=["Hello", "\n"]
+    ) as format_exception:
+        cw.write_traceback("A", "B", "C")
+        format_exception.assert_called_once_with("A", "B", "C")
+        captured = capsys.readouterr()
+        assert captured.err == "Hello\n"
 
 def test_out_traceback_with_format(capsys):
     cw = writer.ConsoleWriter("monokai", sys.stderr)
-    tb = """Traceback (most recent call last):
-  File "test.py", line 1, in <module>
-    3 + 'String'
-TypeError: unsupported operand type(s) for +: 'int' and 'str'"""
-    cw.write_traceback(tb)
+    tb = "Traceback Value"
+    error_message = "Some Error Message"
+    error_type = "IndexError"
+    with patch.object(
+        writer.traceback, "format_exception", return_value=["Some", "traceback"]
+    ) as format_mock:
+        cw.write_traceback(error_type, error_message, tb)
+        format_mock.assert_called_once_with(error_type, error_message, tb)
 
-    captured = capsys.readouterr()
-    escaped_tb = escape_ansi(captured.err)
-    assert escaped_tb.strip() == tb.strip()
+        captured = capsys.readouterr()
+        escaped_tb = escape_ansi(captured.err)
+        assert escaped_tb.strip() == "Sometraceback"
 
 def test_render_last_line(capsys):
     cw = writer.ConsoleWriter("vim", sys.stderr)

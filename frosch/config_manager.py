@@ -87,7 +87,7 @@ class ConfigManager:
             raise ThemeNotExistsError("Theme: '{}' does not exists.\nPlease check \
 https://github.com/HallerPatrick/frosch#configuration for more infos."
                 .format(theme_string)) from import_error
-        except AttributeError as attr_error:
+        except AttributeError as attr_error: # pragma: no cover
             raise ThemeNotExistsError(
                 "Could not find style '{}' in module '{}'".format(
                     style_class, pygment_styles_module

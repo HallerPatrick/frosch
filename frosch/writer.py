@@ -8,44 +8,30 @@
 
     License MIT
 
+    writer handles are the writing and formating to output stream
+
 """
 
-from typing import Any, List
+from contextlib import contextmanager
+import traceback
+from typing import List
 
-import colorama
+from colorama import Fore, Style, init, deinit
 from pygments import highlight
 from pygments.formatters.terminal256 import Terminal256Formatter
 from pygments.lexers.python import Python3Lexer, Python3TracebackLexer
 
+from .parser import ParsedException, Variable
+
 class WrongWriteOrder(Exception):
     """Thrown when the correct order of parts to be written to stream is not correct"""
 
-class Variable:
-    """Dataclass for a variable in error throwing line of program"""
-
-    def __init__(self, id_: str, col_offset: int, value: Any = None):
-        self.name = id_
-        self.col_offset = col_offset
-        self.value = value
-
-    def __repr__(self):
-        """str representation of a Variable object"""
-        return "Variable({!r}, {}, {!r})".format(self.name, self.col_offset, self.value)
-
-    def __eq__(self, other: "Variable"):
-        """Mainly for testing purpose"""
-        return self.__hash__() == other.__hash__()
-
-    def __hash__(self):
-        """We don't care for unique hashes"""
-        return hash((self.name, self.col_offset, self.value))
-
-    def tree_str(self):
-        """Python>3.8 variable declaration format with types"""
-        if self.value is None:
-            return "{} = None".format(self.name)
-        return "{}: {} = {!r}".format(self.name, type(self.value).__qualname__, self.value)
-
+@contextmanager
+def support_windows_colors():
+    """Only for windows terminal"""
+    init()
+    yield
+    deinit()
 
 class ConsoleWriter:
     """Handles formatting, highlighting and writing to output of error message"""
@@ -57,11 +43,27 @@ class ConsoleWriter:
         self.python_traceback_lexer = Python3TracebackLexer()
         self.left_offset = None
 
-    def write_traceback(self, traceback_):
+    def write_exception(self, parsed_exception: ParsedException):
+        """Handles all write methods"""
+        # Write down
+        with support_windows_colors():
+            self.write_traceback(
+                parsed_exception.error_type,
+                parsed_exception.error_message,
+                parsed_exception.traceback
+            )
+            self.write_last_line(parsed_exception.last_stack.lineno, parsed_exception.line)
+            self.write_debug_tree(parsed_exception.variables)
+            self.write_newline()
+
+    def write_traceback(self, error_type, error_message, traceback_):
         """Highlight traceback and write out"""
-        self._write_out(highlight(traceback_, self.python_traceback_lexer, self.terminal_formater))
-
-
+        formatted_exception = "".join(
+            traceback.format_exception(error_type, error_message, traceback_)
+        )
+        self._write_out(
+            highlight(formatted_exception, self.python_traceback_lexer, self.terminal_formater)
+        )
 
     @staticmethod
     def offset_vert_lines(offsets) -> str:
@@ -82,7 +84,7 @@ class ConsoleWriter:
     @staticmethod
     def left_bar() -> str:
         """Bar used on left side of debug tree"""
-        return colorama.Fore.BLUE + "||" + colorama.Style.RESET_ALL
+        return Fore.BLUE + "||" + Style.RESET_ALL
 
     def _write_out(self, message: str):
         """Write to stream"""
