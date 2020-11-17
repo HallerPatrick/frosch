@@ -10,6 +10,6 @@
 
 """
 
-from .frosch import hook
+from .frosch import hook, print_exception
 
-__all__ = ["hook"]
+__all__ = ["hook", "print_exception"]

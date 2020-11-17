@@ -53,7 +53,7 @@ class TestVariable(TestCase):
 class TestConsoleWriter(TestCase):
 
     def setUp(self) -> None:
-        self.cw = writer.ConsoleWriter("monokai")
+        self.cw = writer.ConsoleWriter("monokai", sys.stderr)
 
     def test_offset_vert_lines(self):
         offsets = [1, 4, 7]
@@ -98,19 +98,19 @@ def escape_ansi(line):
 
 # Using capsys fixture
 def test_write_out(capsys):
-    cw = writer.ConsoleWriter("monokai")
+    cw = writer.ConsoleWriter("monokai", sys.stderr)
     cw._write_out("Hello World")
     captured = capsys.readouterr()
     assert captured.err == "Hello World"
 
 def test_output_traceback_no_formatting_applied(capsys):
-    cw = writer.ConsoleWriter("emacs")
+    cw = writer.ConsoleWriter("emacs", sys.stderr)
     cw.write_traceback("Hello")
     captured = capsys.readouterr()
     assert captured.err == "Hello\n"
 
 def test_out_traceback_with_format(capsys):
-    cw = writer.ConsoleWriter("monokai")
+    cw = writer.ConsoleWriter("monokai", sys.stderr)
     tb = """Traceback (most recent call last):
   File "test.py", line 1, in <module>
     3 + 'String'
@@ -122,7 +122,7 @@ TypeError: unsupported operand type(s) for +: 'int' and 'str'"""
     assert escaped_tb.strip() == tb.strip()
 
 def test_render_last_line(capsys):
-    cw = writer.ConsoleWriter("vim")
+    cw = writer.ConsoleWriter("vim", sys.stderr)
     cw.write_last_line(42, "x = hello * 'String'")
     captured = capsys.readouterr()
     output = escape_ansi(captured.err).strip()
@@ -138,7 +138,7 @@ def test_write_debug_tree(capsys):
     var2.value = "Other"
     sorted_values = [var1, var2]
 
-    console_writer = writer.ConsoleWriter("monokai")
+    console_writer = writer.ConsoleWriter("monokai", sys.stderr)
     console_writer.left_offset = 1
     console_writer.write_debug_tree(sorted_values)
 
@@ -161,7 +161,7 @@ def test_write_debug_tree_offset_2(capsys):
     var2.value = "Other"
     sorted_values = [var1, var2]
 
-    console_writer = writer.ConsoleWriter("monokai")
+    console_writer = writer.ConsoleWriter("monokai", sys.stderr)
     console_writer.left_offset = 2
     console_writer.write_debug_tree(sorted_values)
 

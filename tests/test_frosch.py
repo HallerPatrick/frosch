@@ -154,8 +154,20 @@ class TestFrosch(TestCase):
             get_stack_mock.assert_called_with(None, tb_mock)
             self.assertEqual(stack_mock.f_locals, result_locals)
             self.assertEqual(stack_mock.f_globals, result_globals)
+    
+    def test_format_line_whitespaces(self):
+        line = "x  = { 'key' : 3  }"
+        result = frosch.format_line(line)
+        self.assertEqual(result, "x = {'key': 3}")
 
+    def test_format_line_indentation_error(self):
+        line = "for i   in range(0,    10):"
+        result = frosch.format_line(line)
+        self.assertEqual(result, "for i in range(0, 10):")
 
+    def test_format_line_syntax_error(self):
+        with pytest.raises(frosch.ParseError):
+            frosch.format_line("x asd ")
 
     @unittest.skip("How to test this?")
     def test_pytrace_excepthook(self):
