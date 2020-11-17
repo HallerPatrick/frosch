@@ -6,6 +6,27 @@ from frosch.config_manager import ConfigManager, ThemeNotExistsError
 
 class TestConfigManager(TestCase):
 
+    def test_set_notifier(self):
+        config_manager = ConfigManager()
+        config_manager.set_notifier("hello", "world")
+        self.assertEqual(config_manager.title, "hello")
+        self.assertEqual(config_manager.message, "world")
+
+    def test_has_notifcation_only_title(self):
+        config_manager = ConfigManager()
+        config_manager.set_notifier("hello", None)
+        self.assertTrue(config_manager.has_notifier())
+
+    def test_has_notifcation_only_message(self):
+        config_manager = ConfigManager()
+        config_manager.set_notifier(None, "message")
+        self.assertTrue(config_manager.has_notifier())
+
+    def test_has_notifcation_no_notification(self):
+        config_manager = ConfigManager()
+        config_manager.set_notifier(None, None)
+        self.assertFalse(config_manager.has_notifier())
+
     def test_capitalize_theme(self):
         """Most testing done with testing _get_theme_from_string"""
         ConfigManager._get_theme_from_string("vs")
@@ -13,7 +34,6 @@ class TestConfigManager(TestCase):
     def test__get_theme_from_string_not_found(self):
         with pytest.raises(ThemeNotExistsError):
             ConfigManager._get_theme_from_string("not existing")
-
 
     def test__get_theme_from_string(self):
         themes = [

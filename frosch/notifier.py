@@ -18,7 +18,7 @@ def notify_os(title: str = "Ups", message: str = "Your python program crashed.")
     current_platform = platform.system()
 
     if current_platform == "Darwin":
-        command = mac_notify(title, message)
+        command = darwin_notify(title, message)
     elif current_platform == "Linux":
         command = linux_notify(title, message)
     elif current_platform == "Windows":
@@ -28,7 +28,7 @@ def notify_os(title: str = "Ups", message: str = "Your python program crashed.")
 
     os.system(command)
 
-def mac_notify(title: str, message: str) -> str:
+def darwin_notify(title: str, message: str) -> str:
     """Display notification for MacOS systems"""
     command = f'''osascript -e 'display notification "{message}" with title "{title}"' '''
     return command
