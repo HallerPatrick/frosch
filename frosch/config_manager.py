@@ -13,6 +13,8 @@ import importlib
 import string
 from typing import Optional
 
+from .type_hooks import HookLoader
+
 class ThemeNotExistsError(Exception):
     """Thrown when trying to import a theme from pygments which does not exist"""
 
@@ -23,6 +25,7 @@ class ConfigManager:
         self.message = None
         self.title = None
         self._theme = None
+        self.dt_hooks = None
 
     def set_notifier(self, title: str, message: str):
         """Setter for notifcation message"""
@@ -132,3 +135,16 @@ https://github.com/HallerPatrick/frosch#configuration for more infos."
         if theme_string in themes:
             return themes[theme_string]
         return None
+
+    def initialize_datatype_hook_loader(self) -> HookLoader:
+        """Initialize the loader, eventually with custom user created hooks"""
+        if self.dt_hooks:
+            assert dict == type(self.dt_hooks)
+            hook_loader = HookLoader.with_hooks(self.dt_hooks)
+        else:
+            hook_loader = HookLoader()
+
+        return hook_loader
+
+
+
