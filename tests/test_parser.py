@@ -9,7 +9,6 @@ from frosch import parser
 
 class TestParser(TestCase):
 
-
     def test_debug_variables_none_locals_globals(self):
         variables = [
             parser.Variable("x", 4),
@@ -159,6 +158,7 @@ class TestParser(TestCase):
         with pytest.raises(parser.ParseError):
             parser.format_line("x asd ")
 
+
 class TestParsedException(TestCase):
 
     def test_parsed_exception_init(self):
@@ -178,7 +178,6 @@ class TestParsedException(TestCase):
         # Mhh a lot of mocking
         with patch.object(parser.traceback, "extract_tb") as extract_mock:
             with patch.object(parser.ParsedException, "_get_variables") as get_vars_mock:
-
                 with patch.object(parser.ParsedException, "_extract_tokens_from_stack") as extract_mock:
                     extract_mock.return_value = "tokens"
                     with patch.object(parser, "extract_source_code") as source_mock:
@@ -192,3 +191,9 @@ class TestParsedException(TestCase):
                             format_mock.assert_called_once_with("Line")
                             
 
+    def test_get_variables(self):
+        with patch.object(parser.traceback, "extract_tb") as _:
+            with patch.object(parser.ParsedException, "_get_vars_from_tb") as get_mock:
+                parsed_exception = parser.ParsedException("traceback", None, None)
+                parsed_exception._get_variables()
+                self.assertTrue(get_mock.called)

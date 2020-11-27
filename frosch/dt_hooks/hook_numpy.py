@@ -1,10 +1,18 @@
+"""
+
+    frosch - Better runtime errors
+
+    Patrick Haller
+    patrickhaller40@googlemail.com
+
+    License MIT
+
+"""
 import numpy as np
 
 
-def display_np_array(np_array, config=None) -> str:
+def display_np_array(np_array) -> str:
     """Display function for np.array"""
-    if config == None:
-        config = dict()
 
     result = ""
     result = f'{result} {np_array.shape}'
@@ -29,7 +37,8 @@ def display_np_array(np_array, config=None) -> str:
     nan = np.isnan(np_array).sum()
     inf = np.isinf(np_array).sum()
     if nan>0:
-        warning_marker = lambda x: f'!!{x}!!' # It would mark the content as warning, e.g. coloring to red
+        # It would mark the content as warning, e.g. coloring to red
+        warning_marker = lambda x: f'!!{x}!!'
         nan = warning_marker(f'NaNs:{nan}')
     else:
         nan = f'NaNs:{nan}'
@@ -44,15 +53,10 @@ def display_np_array(np_array, config=None) -> str:
         med_ = np.median(tmp)
         result = f'{result} min:{min_} max:{max_} median:{med_}'
 
-    # I assume the array will be printed anyway
-    # So i expect it in this form:
-    # VARIABLE = {result} \n
-    #            [[ .... ],
-    #               .....]]
-
     return result
 
 
-numpy_hooks = {
-    np.array: display_np_array
+hooks = {
+    np.array: display_np_array,
+    np.ndarray: display_np_array
 }

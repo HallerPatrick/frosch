@@ -10,6 +10,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from frosch import writer
+from frosch.type_hooks import HookLoader
 
 class TestVariable(TestCase):
 
@@ -65,7 +66,7 @@ class TestWindowsColorSupport(TestCase):
 class TestConsoleWriter(TestCase):
 
     def setUp(self) -> None:
-        self.cw = writer.ConsoleWriter("monokai", sys.stderr)
+        self.cw = writer.ConsoleWriter("monokai", sys.stderr,HookLoader())
 
     def test_offset_vert_lines(self):
         offsets = [1, 4, 7]
@@ -137,13 +138,13 @@ def escape_ansi(line):
 
 # Using capsys fixture
 def test_write_out(capsys):
-    cw = writer.ConsoleWriter("monokai", sys.stderr)
+    cw = writer.ConsoleWriter("monokai", sys.stderr, HookLoader())
     cw._write_out("Hello World")
     captured = capsys.readouterr()
     assert captured.err == "Hello World"
 
 def test_output_traceback_no_formatting_applied(capsys):
-    cw = writer.ConsoleWriter("emacs", sys.stderr)
+    cw = writer.ConsoleWriter("emacs", sys.stderr, HookLoader())
     with patch.object(
         writer.traceback, "format_exception", return_value=["Hello", "\n"]
     ) as format_exception:
@@ -153,7 +154,7 @@ def test_output_traceback_no_formatting_applied(capsys):
         assert captured.err == "Hello\n"
 
 def test_out_traceback_with_format(capsys):
-    cw = writer.ConsoleWriter("monokai", sys.stderr)
+    cw = writer.ConsoleWriter("monokai", sys.stderr, HookLoader())
     tb = "Traceback Value"
     error_message = "Some Error Message"
     error_type = "IndexError"
@@ -168,7 +169,7 @@ def test_out_traceback_with_format(capsys):
         assert escaped_tb.strip() == "Sometraceback"
 
 def test_render_last_line(capsys):
-    cw = writer.ConsoleWriter("vim", sys.stderr)
+    cw = writer.ConsoleWriter("vim", sys.stderr, HookLoader())
     cw.write_last_line(42, "x = hello * 'String'")
     captured = capsys.readouterr()
     output = escape_ansi(captured.err).strip()
@@ -184,7 +185,7 @@ def test_write_debug_tree(capsys):
     var2.value = "Other"
     sorted_values = [var1, var2]
 
-    console_writer = writer.ConsoleWriter("monokai", sys.stderr)
+    console_writer = writer.ConsoleWriter("monokai", sys.stderr, HookLoader())
     console_writer.left_offset = 1
     console_writer.write_debug_tree(sorted_values)
 
@@ -207,7 +208,7 @@ def test_write_debug_tree_offset_2(capsys):
     var2.value = "Other"
     sorted_values = [var1, var2]
 
-    console_writer = writer.ConsoleWriter("monokai", sys.stderr)
+    console_writer = writer.ConsoleWriter("monokai", sys.stderr, HookLoader())
     console_writer.left_offset = 2
     console_writer.write_debug_tree(sorted_values)
 

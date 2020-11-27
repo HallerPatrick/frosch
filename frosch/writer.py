@@ -3,7 +3,6 @@
     frosch - Better runtime errors
 
     Patrick Haller
-    betterthannothing.blog
     patrickhaller40@googlemail.com
 
     License MIT
@@ -14,7 +13,7 @@
 
 from contextlib import contextmanager
 import traceback
-from typing import Callable, List
+from typing import List
 
 from colorama import Fore, Style, init, deinit
 from pygments import highlight

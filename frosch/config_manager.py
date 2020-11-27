@@ -145,6 +145,3 @@ https://github.com/HallerPatrick/frosch#configuration for more infos."
             hook_loader = HookLoader()
 
         return hook_loader
-
-
-

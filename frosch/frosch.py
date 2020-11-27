@@ -18,7 +18,6 @@ from .config_manager import ConfigManager
 from .notifier import notify_os
 from .parser import ParsedException
 from .writer import ConsoleWriter
-from .type_hooks import HookLoader
 
 
 def hook(**kwargs):

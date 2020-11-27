@@ -48,6 +48,7 @@ class Variable:
 
     @property
     def type(self):
+        """Property for the type of a value"""
         return type(self.value)
 
     def tree_str(self):
