@@ -15,7 +15,6 @@ Pygments = "^2.7.2"
 stack-data = "^0.1.0"
 asttokens = "^2.0.4"
 yapf = "^0.30.0"
-hypothesmith = "^0.1.7"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.6.0"
@@ -26,10 +25,10 @@ pytest-cov = "^2.10.1"
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-
 [tool.poetry.scripts]
 example = "example.example:hello"
 
 [tool.pylint.messages_control]
 max-line-width = 100
 disable = "eval-used"
+ignore = "frosch/dt_hooks"

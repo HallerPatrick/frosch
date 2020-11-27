@@ -3,7 +3,6 @@
     frosch - Better runtime errors
 
     Patrick Haller
-    betterthannothing.blog
     patrickhaller40@googlemail.com
 
     License MIT
@@ -22,6 +21,7 @@ from pygments.formatters.terminal256 import Terminal256Formatter
 from pygments.lexers.python import Python3Lexer, Python3TracebackLexer
 
 from .parser import ParsedException, Variable
+from .type_hooks import HookLoader
 
 class WrongWriteOrder(Exception):
     """Thrown when the correct order of parts to be written to stream is not correct"""
@@ -36,12 +36,13 @@ def support_windows_colors():
 class ConsoleWriter:
     """Handles formatting, highlighting and writing to output of error message"""
 
-    def __init__(self, theme, stream):
+    def __init__(self, theme, stream, hook_loader: HookLoader):
         self.stream = stream
         self.terminal_formater = Terminal256Formatter(style=theme)
         self.python_lexer = Python3Lexer()
         self.python_traceback_lexer = Python3TracebackLexer()
         self.left_offset = None
+        self.hook_loader = hook_loader
 
     def write_exception(self, parsed_exception: ParsedException):
         """Handles all write methods"""
@@ -66,7 +67,7 @@ class ConsoleWriter:
         )
 
     @staticmethod
-    def offset_vert_lines(offsets) -> str:
+    def offset_vert_lines(offsets: List[int]) -> str:
         """Construct a line with vertical bars for all offsets in offsets"""
         line = ""
 
@@ -119,7 +120,7 @@ class ConsoleWriter:
             self._write_out(line)
             self.write_newline()
 
-    def construct_debug_tree(self, lines, sorted_values):
+    def construct_debug_tree(self, lines: List[int], sorted_values: List[Variable]):
         """Construction of debug tree"""
         current_offset = -1
         offsets = [val.col_offset for val in sorted_values]
@@ -139,12 +140,14 @@ class ConsoleWriter:
                 if j != (unprocessed_values - 1):
                     lines[i] += "│"
                 else:
+                    # Check for datatype hooks and use instead
+                    value = self.hook_loader.run_hook(value)
+
                     lines[i] += "└── {}".format(
-                        highlight(value.tree_str(), self.python_lexer, self.terminal_formater)
-                        .rstrip()
+                        highlight(value, self.python_lexer, self.terminal_formater).rstrip()
                     )
 
-                    # Add spacong row
+                    # Add spacing row
                     if offsets:
                         del offsets[-1]
                     i += 1

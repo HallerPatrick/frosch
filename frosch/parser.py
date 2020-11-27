@@ -46,6 +46,11 @@ class Variable:
         """We don't care for unique hashes"""
         return hash((self.name, self.col_offset, self.value))
 
+    @property
+    def type(self):
+        """Property for the type of a value"""
+        return type(self.value)
+
     def tree_str(self):
         """Python>3.8 variable declaration format with types"""
         if self.value is None:

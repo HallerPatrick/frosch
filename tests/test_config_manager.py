@@ -74,3 +74,15 @@ class TestConfigManager(TestCase):
         ]
         for theme in themes:
             ConfigManager().theme = theme
+
+    def test_initialize_datatype_hook_loader_no_hooks(self):
+        config_manager = ConfigManager()
+        hook_loader = config_manager.initialize_datatype_hook_loader()
+        self.assertDictEqual(hook_loader._hooks, {})
+
+    def test_initialize_datatype_hook_loader_with_hooks(self):
+        config_manager = ConfigManager()
+        hooks = {list: lambda x: x}
+        config_manager.dt_hooks = hooks
+        hook_loader = config_manager.initialize_datatype_hook_loader()
+        self.assertDictEqual(hook_loader._hooks, hooks)
