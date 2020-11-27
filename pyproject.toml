@@ -31,3 +31,4 @@ example = "example.example:hello"
 [tool.pylint.messages_control]
 max-line-width = 100
 disable = "eval-used"
+ignore = "frosch/dt_hooks"
