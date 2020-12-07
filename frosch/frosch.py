@@ -30,6 +30,7 @@ def hook(**kwargs):
     pytrace_excepthook.configs = config_manager
     _hook()
 
+
 def _hook():
     """Overwrite sys.excepthook"""
     # Don't want global vars
