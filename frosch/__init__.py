@@ -10,7 +10,8 @@
 
 """
 
+from . import style
 from .frosch import hook, print_exception
 from .printer import fprint
 
-__all__ = ["hook", "print_exception", "fprint"]
+__all__ = ["hook", "print_exception", "fprint", "style"]
