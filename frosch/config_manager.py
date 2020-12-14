@@ -64,7 +64,7 @@ class ConfigManager:
         return self._theme
 
     @theme.setter
-    def theme(self, theme: Union[str, Style]):
+    def theme(self, theme: Union[str, Style]): # pylint: disable=E1136
         """Sets theme object of pygments for given string or already defined custom style"""
         if isinstance(theme, str):
             self._theme = ConfigManager._get_theme_from_string(theme)
