@@ -80,8 +80,9 @@ hook(theme="vim")
 ````
 ### Custom Themes
 
-You can also define custom themes by using by subclassing Style (which is just a thin wrapper
-around pygments styles). For more information please use the [pygments docs](https://pygments.org/docs/styles/#creating-own-styles).
+You can also define custom themes by by subclassing Style (which is just a thin wrapper
+around pygments styles) and pass it to the hook.
+For more information please use the [pygments docs](https://pygments.org/docs/styles/#creating-own-styles).
 
 ```python
 
