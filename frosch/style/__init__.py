@@ -9,7 +9,4 @@
 
 """
 
-from . import style
-from .frosch import hook, print_exception
-
-__all__ = ["hook", "print_exception", "style"]
+from pygments.style import Style

@@ -3,7 +3,6 @@
     frosch - Better runtime errors
 
     Patrick Haller
-    betterthannothing.blog
     patrickhaller40@googlemail.com
 
     License MIT
@@ -29,6 +28,7 @@ def hook(**kwargs):
 
     pytrace_excepthook.configs = config_manager
     _hook()
+
 
 def _hook():
     """Overwrite sys.excepthook"""
