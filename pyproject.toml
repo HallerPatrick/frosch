@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "frosch"
-version = "0.1.6"
+version = "0.1.7"
 description = "Better runtime error messages"
 authors = ["Patrick Haller <patrickhaller40@googlemail.com>"]
 readme = "README.md"
