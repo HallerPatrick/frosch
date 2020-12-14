@@ -87,7 +87,8 @@ around pygments styles). For more information please use the [pygments docs](htt
 
 from frosch import hook
 from frosch.style import Style
-
+from frosch.style.token import Keyword, Name, Comment, String, Error, \
+     Number, Operator, Generic
 
 class CustomStyle(Style):
     default_style = ""
