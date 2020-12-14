@@ -1,12 +1,12 @@
-import sys
-
 import unittest
 from unittest import TestCase
-from unittest.mock import Mock, patch, PropertyMock
+from unittest.mock import Mock, patch
+import sys
 
 import pytest
 
 from frosch import frosch
+
 
 
 

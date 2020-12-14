@@ -78,6 +78,32 @@ from frosch import hook
 
 hook(theme="vim")
 ````
+### Custom Themes
+
+You can also define custom themes by using by subclassing Style (which is just a thin wrapper
+around pygments styles). For more information please use the [pygments docs](https://pygments.org/docs/styles/#creating-own-styles).
+
+```python
+
+from frosch import hook
+from frosch.style import Style
+from frosch.style.token import Keyword, Name, Comment, String, Error, \
+     Number, Operator, Generic
+
+class CustomStyle(Style):
+    default_style = ""
+    styles = {
+        Comment:                'italic #888',
+        Keyword:                'bold #005',
+        Name:                   '#f00',
+        Name.Function:          '#0f0',
+        Name.Class:             'bold #0f0',
+        String:                 'bg:#eee #111'
+    }
+
+hook(theme=CustomStyle)
+
+```
 
 ## OS Notifications
 
@@ -85,7 +111,7 @@ But wait there is more!
 
 Running longer scripts in the background?
 
-Just add a title and/or message to the hook and it will you give a notification when your program 
+Just add a title and/or message to the hook and it will you give a notification when your program
 is crashing.
 
 
@@ -100,7 +126,7 @@ hook(
 )
 ```
 
-This works on MacOS (`osascript`), Linux (`notify-send`) and Windows (`powershell`). 
+This works on MacOS (`osascript`), Linux (`notify-send`) and Windows (`powershell`).
 
 
 

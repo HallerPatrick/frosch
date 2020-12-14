@@ -11,7 +11,9 @@
 """
 import importlib
 import string
-from typing import Optional
+from typing import Optional, Union
+
+from pygments.style import Style
 
 from .type_hooks import HookLoader
 
@@ -62,12 +64,15 @@ class ConfigManager:
         return self._theme
 
     @theme.setter
-    def theme(self, theme: str):
-        """Sets theme object of pygments for given string"""
-        self._theme = ConfigManager._get_theme_from_string(theme)
+    def theme(self, theme: Union[str, Style]): # pylint: disable=E1136
+        """Sets theme object of pygments for given string or already defined custom style"""
+        if isinstance(theme, str):
+            self._theme = ConfigManager._get_theme_from_string(theme)
+        else:
+            self._theme = theme
 
     @staticmethod
-    def _get_theme_from_string(theme_string: str):
+    def _get_theme_from_string(theme_string: str) -> Style:
         """Import the according theme from pygments"""
         pygment_styles_module = "pygments.styles.{}.{}Style".format(
             theme_string, theme_string.capitalize()

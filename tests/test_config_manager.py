@@ -3,6 +3,9 @@ from unittest import TestCase
 import pytest
 
 from frosch.config_manager import ConfigManager, ThemeNotExistsError
+from frosch.style import Style
+from frosch.style.token import Keyword, Name, Comment, String, Error, \
+     Number, Operator, Generic
 
 class TestConfigManager(TestCase):
 
@@ -74,6 +77,22 @@ class TestConfigManager(TestCase):
         ]
         for theme in themes:
             ConfigManager().theme = theme
+
+    def test_use_custom_theme(self):
+        class YourStyle(Style):
+            default_style = ""
+            styles = {
+                Comment:                'italic #888',
+                Keyword:                'bold #005',
+                Name:                   '#f00',
+                Name.Function:          '#0f0',
+                Name.Class:             'bold #0f0',
+                String:                 'bg:#eee #111'
+            }
+        config_manager = ConfigManager()
+        config_manager.theme = YourStyle
+
+        self.assertEqual(type(config_manager.theme), type(YourStyle))
 
     def test_initialize_datatype_hook_loader_no_hooks(self):
         config_manager = ConfigManager()

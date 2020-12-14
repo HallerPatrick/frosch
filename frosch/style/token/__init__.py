@@ -9,7 +9,5 @@
 
 """
 
-from . import style
-from .frosch import hook, print_exception
-
-__all__ = ["hook", "print_exception", "style"]
+from pygments.token import Keyword, Name, Comment, String, Error, \
+     Number, Operator, Generic
