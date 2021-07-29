@@ -20,7 +20,7 @@ pytest-sugar = "^0.9.4"
 [tool.poetry.dev-dependencies]
 pylint = "^2.6.0"
 pytest = "^6.1.2"
-pytest-cov = "^2.10.1"
+pytest-cov = "^2.12.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
