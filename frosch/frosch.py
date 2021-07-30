@@ -20,6 +20,9 @@ from .parser import MissingStacktraceError, ParsedException
 from .writer import ConsoleWriter
 
 
+DEBUG = False
+
+
 def hook(**kwargs):
     """Initialize configurations for frosch and set hook"""
     if kwargs:
@@ -50,15 +53,27 @@ def print_exception(exception: Exception):
 
 
 def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: TracebackType=None):
-    """New excepthook to overwrite sys.excepthook"""
+    """New excepthook to overwrite sys.excepthook with a safe fallback"""
 
+    if DEBUG:
+        _pytrace_excepthook(error_type, error_message, traceback_)
+
+    try:
+        _pytrace_excepthook(error_type, error_message, traceback_)
+    except Exception:  # pylint: disable=W0703
+        sys.stderr.write("".join(traceback.format_exception(error_type, error_message, traceback_)))
+        sys.exit(1)
+
+
+def _pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: TracebackType=None):
+    """New excepthook to overwrite sys.excepthook"""
     configs = pytrace_excepthook.configs
     hook_loader = configs.initialize_datatype_hook_loader()
 
     try:
         parsed_exception = ParsedException(traceback_, error_type, error_message)
     except MissingStacktraceError:
-        print(traceback.format_exception(error_type, error_message, traceback_))
+        sys.stderr.write("".join(traceback.format_exception(error_type, error_message, traceback_)))
         sys.exit(1)
 
     # Write down
