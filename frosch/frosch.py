@@ -10,12 +10,13 @@
 """
 
 import sys
+import traceback
 
 from types import TracebackType
 
 from .config_manager import ConfigManager
 from .notifier import notify_os
-from .parser import ParsedException
+from .parser import MissingStacktraceError, ParsedException
 from .writer import ConsoleWriter
 
 
@@ -50,13 +51,22 @@ def print_exception(exception: Exception):
 
 def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: TracebackType=None):
     """New excepthook to overwrite sys.excepthook"""
+
     configs = pytrace_excepthook.configs
     hook_loader = configs.initialize_datatype_hook_loader()
 
-    parsed_exception = ParsedException(traceback_, error_type, error_message)
+    try:
+        parsed_exception = ParsedException(traceback_, error_type, error_message)
+    except MissingStacktraceError:
+        print(traceback.format_exception(error_type, error_message, traceback_))
+        sys.exit(1)
+
     # Write down
     console_writer = ConsoleWriter(configs.theme, sys.stderr, hook_loader)
     console_writer.write_exception(parsed_exception)
 
     if configs.has_notifier():
         notify_os(configs.title, configs.message)
+
+    # We always dealing with runtime errors, so always return 1
+    sys.exit(1)

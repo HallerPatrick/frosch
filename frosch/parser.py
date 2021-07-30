@@ -26,6 +26,9 @@ from yapf.yapflib.yapf_api import FormatCode
 class ParseError(Exception):
     """Thrown in crashing line cannot be parsed with ast.parse"""
 
+class MissingStacktraceError(Exception):
+    """Thrown when traceback cannot be found"""
+
 class Variable:
     """Dataclass for a variable in error throwing line of program"""
 
@@ -65,7 +68,13 @@ class ParsedException():
         self.error_message = error_message
 
         # Get last stack where crash occuredtrace
-        self.last_stack = traceback.extract_tb(traceback_)[-1]
+        stack = traceback.extract_tb(traceback_)
+
+        try:
+            self.last_stack = stack[-1]
+        except IndexError as error:
+            raise MissingStacktraceError("No stacktrace can be extracted") from error
+
 
         self.line = self._get_source_line()
         self.variables = self._get_variables()
