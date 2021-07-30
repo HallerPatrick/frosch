@@ -20,6 +20,7 @@ from types import TracebackType
 from typing import Any, List
 
 from asttokens.util import Token
+from cheap_repr import cheap_repr
 from stack_data import Source
 from yapf.yapflib.yapf_api import FormatCode
 
@@ -58,7 +59,11 @@ class Variable:
         """Python>3.8 variable declaration format with types"""
         if self.value is None:
             return "{} = None".format(self.name)
-        return "{}: {} = {!r}".format(self.name, type(self.value).__qualname__, self.value)
+        return "{}: {} = {}".format(
+                self.name,
+                type(self.value).__qualname__,
+                cheap_repr(self.value)
+        )
 
 class ParsedException():
     """Handling all data relevant to parsing and formatting the received exception raising"""

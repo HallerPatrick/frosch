@@ -16,6 +16,7 @@ stack-data = "^0.1.0"
 asttokens = "^2.0.4"
 yapf = ">=0.30,<0.32"
 pytest-sugar = "^0.9.4"
+cheap_repr = "^0.4.5"
 
 [tool.poetry.dev-dependencies]
 pylint = "^2.9.6"
