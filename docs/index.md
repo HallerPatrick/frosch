@@ -2,10 +2,3 @@
 
 `frosch` is a library that supports you, as a Python developer, to have a more easier time, while debugging your code.
 
-Test Change
-        
-# Reference
-
-::: frosch.frosch.hook
-
-::: frosch.frosch.print_exception
