@@ -4,7 +4,9 @@ site_url: https://example.com/
 nav:
   - Home: index.md
   - Getting Started: getting_started.md
-  - Documentation:
+  - Features:
+    - Exception Printing: exception_printing.md
+  - Configuration:
     - Themes: themes.md
     - Notifications: notifications.md
   - About: about.md

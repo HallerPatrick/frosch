@@ -77,7 +77,8 @@ Usage:
 from frosch import hook
 
 hook(theme="vim")
-````
+```
+
 ### Custom Themes
 
 You can also define custom themes by by subclassing Style (which is just a thin wrapper
