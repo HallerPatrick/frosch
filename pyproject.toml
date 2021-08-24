@@ -19,7 +19,7 @@ pytest-sugar = "^0.9.4"
 cheap_repr = "^0.4.5"
 
 [tool.poetry.dev-dependencies]
-pylint = "^2.9.6"
+pylint = "^2.10.2"
 pytest = "^6.2.4"
 pytest-cov = "^2.12.1"
 
