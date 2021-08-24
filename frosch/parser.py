@@ -165,7 +165,7 @@ def parse_error_line(line: str) -> List[Variable]:
         # If we handling multilines this will not be parsed
         tree = ast.parse(line)
 
-    except IndentationError as error:
+    except IndentationError as _:
         # Case of trying to parse a piece of a statement, like a for loop header
         # Try again with a pass stament
         tree = ast.parse(line + "pass")
@@ -193,7 +193,7 @@ def format_line(line: str) -> str:
         # If we handling multilines this will not be parsed
         formatted_line, _ =  FormatCode(line)
 
-    except IndentationError as error:
+    except IndentationError as _:
         # Case of trying to parse a piece of a statement, like a for loop header
         # Try again with a pass stament
         formatted_line, _ = FormatCode(line + "pass")
