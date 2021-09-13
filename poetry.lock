@@ -50,14 +50,14 @@ tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>
 
 [[package]]
 name = "cheap-repr"
-version = "0.4.6"
+version = "0.5.0"
 description = "Better version of repr/reprlib for short, cheap string representations."
 category = "main"
 optional = false
 python-versions = "*"
 
 [package.extras]
-tests = ["django", "pandas (>=0.24.2)", "numpy (>=1.16.3)", "pytest"]
+tests = ["pytest", "django", "pandas (>=0.24.2)", "numpy (>=1.16.3)", "chainmap", "Django (<2)", "pandas (>=0.24.2,<0.25)", "numpy (>=1.16.3,<1.17)", "Django (<3)", "pandas (>=0.24.2,<0.26)", "numpy (>=1.16.3,<1.19)"]
 
 [[package]]
 name = "colorama"
@@ -365,7 +365,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "1ad94afac1f7bb13beb927ae71dda2c08941dd22852160ffcbf30a3f4e957192"
+content-hash = "419a38845d3c2c22592611cf147c59b7741321672c17967deb9e48324a695260"
 
 [metadata.files]
 astroid = [
@@ -385,7 +385,8 @@ attrs = [
     {file = "attrs-20.2.0.tar.gz", hash = "sha256:26b54ddbbb9ee1d34d5d3668dd37d6cf74990ab23c828c2888dccdceee395594"},
 ]
 cheap-repr = [
-    {file = "cheap_repr-0.4.6.tar.gz", hash = "sha256:b4aec1219b0b3ad0e8f99d8253ecc6263b54991b902e9ed7c03f1e7ff72180c3"},
+    {file = "cheap_repr-0.5.0-py2.py3-none-any.whl", hash = "sha256:af9646f2872cdce311c5c08d23633479a5b34666788a06864c3af783c82e841a"},
+    {file = "cheap_repr-0.5.0.tar.gz", hash = "sha256:3e2b9688e83970139d0efa51a68e7737e4fd1f6ea2e4e82b53de168bc89d8e0f"},
 ]
 colorama = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},
