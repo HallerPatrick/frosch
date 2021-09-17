@@ -13,6 +13,7 @@ import sys
 import traceback
 
 from types import TracebackType
+from typing import Optional, Type
 
 from .config_manager import ConfigManager
 from .notifier import notify_os
@@ -21,6 +22,9 @@ from .writer import ConsoleWriter
 
 
 DEBUG = False
+
+ETType = Optional[Type[BaseException]]
+EType = Optional[BaseException]
 
 
 def hook(**kwargs):
@@ -39,6 +43,7 @@ def _hook():
     # Don't want global vars
     sys.excepthook = pytrace_excepthook
 
+
 def print_exception(exception: Exception):
     """Pretty print the exception and traceback to stdout"""
     config_manager = ConfigManager.default()
@@ -47,12 +52,16 @@ def print_exception(exception: Exception):
 
     # Do we even need exception as param?
     error_type, error_message, _ = sys.exc_info()
-    parsed_exception = ParsedException(exception.__traceback__, error_type, error_message)
+    parsed_exception = ParsedException(
+        exception.__traceback__, error_type, error_message
+    )
     console_writer = ConsoleWriter(config_manager.theme, sys.stdout, hook_loader)
     console_writer.write_exception(parsed_exception)
 
 
-def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: TracebackType=None):
+def pytrace_excepthook(
+    error_type: ETType, error_message: EType, traceback_: TracebackType
+):
     """New excepthook to overwrite sys.excepthook with a safe fallback"""
 
     if DEBUG:
@@ -61,11 +70,15 @@ def pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: T
     try:
         _pytrace_excepthook(error_type, error_message, traceback_)
     except Exception:  # pylint: disable=W0703
-        sys.stderr.write("".join(traceback.format_exception(error_type, error_message, traceback_)))
+        sys.stderr.write(
+            "".join(traceback.format_exception(error_type, error_message, traceback_))
+        )
         sys.exit(1)
 
 
-def _pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: TracebackType=None):
+def _pytrace_excepthook(
+    error_type: ETType, error_message: EType, traceback_: TracebackType
+):
     """New excepthook to overwrite sys.excepthook"""
     configs = pytrace_excepthook.configs
     hook_loader = configs.initialize_datatype_hook_loader()
@@ -73,7 +86,9 @@ def _pytrace_excepthook(error_type: type, error_message: TypeError, traceback_: 
     try:
         parsed_exception = ParsedException(traceback_, error_type, error_message)
     except MissingStacktraceError:
-        sys.stderr.write("".join(traceback.format_exception(error_type, error_message, traceback_)))
+        sys.stderr.write(
+            "".join(traceback.format_exception(error_type, error_message, traceback_))
+        )
         sys.exit(1)
 
     # Write down

@@ -16,7 +16,7 @@
 
 from collections.abc import Callable
 import importlib
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 # from .dt_hooks import hooks
 from .parser import Variable
@@ -24,9 +24,9 @@ from .parser import Variable
 T = Any
 
 # This will probably break/not work if there a types of the same name
-type_to_module = {
-    "ndarray": "numpy"
-}
+type_to_module = {"ndarray": "numpy"}
+
+
 class HookLoader:
     """HookLoader manages all datatype hooks for display relevant variables in output"""
 
@@ -37,15 +37,15 @@ class HookLoader:
     def with_hooks(cls, hooks: dict):
         """Init HookLoader with predefined hooks"""
         loader = cls()
-        loader._hooks = hooks # pylint: disable=W0212
+        loader._hooks = hooks  # pylint: disable=W0212
         return loader
 
-    def _lazy_load_hooks(self, module) -> Dict[type, Callable]:
+    def _lazy_load_hooks(self, module) -> Optional[Dict[type, Callable]]:
         """Because we don't know what variables are actually used and to avoid import
         errors, we load modules which contains the imported libraries e.g numpy lazy
         and than get the hook functions"""
         try:
-            module = importlib.import_module(".dt_hooks.{}".format(module), package="frosch")
+            module = importlib.import_module(f".dt_hooks.{module}", package="frosch")
         except ImportError:
             return
         self._hooks.update(module.hooks)
@@ -61,9 +61,8 @@ class HookLoader:
         except KeyError:
             return
 
-        module_name = "hook_{}".format(module_name)
+        module_name = f"hook_{module_name}"
         self._lazy_load_hooks(module_name)
-
 
     def run_hook(self, variable: Variable) -> str:
         """Check if hook is already imported, else try import"""

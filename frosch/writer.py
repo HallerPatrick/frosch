@@ -23,8 +23,7 @@ from pygments.lexers.python import Python3Lexer, Python3TracebackLexer
 from .parser import ParsedException, Variable
 from .type_hooks import HookLoader
 
-class WrongWriteOrder(Exception):
-    """Thrown when the correct order of parts to be written to stream is not correct"""
+
 
 @contextmanager
 def support_windows_colors():
@@ -32,6 +31,7 @@ def support_windows_colors():
     init()
     yield
     deinit()
+
 
 class ConsoleWriter:
     """Handles formatting, highlighting and writing to output of error message"""
@@ -41,7 +41,7 @@ class ConsoleWriter:
         self.terminal_formater = Terminal256Formatter(style=theme)
         self.python_lexer = Python3Lexer()
         self.python_traceback_lexer = Python3TracebackLexer()
-        self.left_offset = None
+        self.left_offset = 0
         self.hook_loader = hook_loader
 
     def write_exception(self, parsed_exception: ParsedException):
@@ -51,9 +51,11 @@ class ConsoleWriter:
             self.write_traceback(
                 parsed_exception.error_type,
                 parsed_exception.error_message,
-                parsed_exception.traceback
+                parsed_exception.traceback,
             )
-            self.write_last_line(parsed_exception.last_stack.lineno, parsed_exception.line)
+            self.write_last_line(
+                parsed_exception.last_stack.lineno, parsed_exception.line
+            )
             self.write_debug_tree(parsed_exception.variables)
             self.write_newline()
 
@@ -63,7 +65,9 @@ class ConsoleWriter:
             traceback.format_exception(error_type, error_message, traceback_)
         )
         self._write_out(
-            highlight(formatted_exception, self.python_traceback_lexer, self.terminal_formater)
+            highlight(
+                formatted_exception, self.python_traceback_lexer, self.terminal_formater
+            )
         )
 
     @staticmethod
@@ -75,8 +79,8 @@ class ConsoleWriter:
 
         # First line
         for offset in offsets:
-            new_offset = offset - current_offset -1
-            line += (" " * new_offset)
+            new_offset = offset - current_offset - 1
+            line += " " * new_offset
             line += "│"
             current_offset = offset
 
@@ -97,22 +101,17 @@ class ConsoleWriter:
         self.stream.write("\n")
         self.stream.flush()
 
-
     def write_debug_tree(self, names: List[Variable]):
         """Sort offsets and values for construction of debug tree"""
 
         sorted_values = list(sorted(names, key=lambda val: val.col_offset))
 
         num_variables = len(sorted_values)
-        try:
-            line_offset = " " * self.left_offset
-        except TypeError as type_error:
-            raise WrongWriteOrder("Offset not defined") from type_error
+        line_offset = " " * self.left_offset
 
         lines = [
-           "  {}{} ".format(line_offset, self.left_bar()) for _ in range((2*num_variables) + 1)
+            f"  {line_offset}{self.left_bar()} " for _ in range((2 * num_variables) + 1)
         ]
-
 
         self.construct_debug_tree(lines, sorted_values)
 
@@ -120,7 +119,7 @@ class ConsoleWriter:
             self._write_out(line)
             self.write_newline()
 
-    def construct_debug_tree(self, lines: List[int], sorted_values: List[Variable]):
+    def construct_debug_tree(self, lines: List[str], sorted_values: List[Variable]):
         """Construction of debug tree"""
         current_offset = -1
         offsets = [val.col_offset for val in sorted_values]
@@ -134,8 +133,8 @@ class ConsoleWriter:
         for value in reversed(sorted_values):
             # For every value
             for j in range(unprocessed_values):
-                new_offset = sorted_values[j].col_offset - current_offset -1
-                lines[i] += (" " * (new_offset))
+                new_offset = sorted_values[j].col_offset - current_offset - 1
+                lines[i] += " " * (new_offset)
 
                 if j != (unprocessed_values - 1):
                     lines[i] += "│"
@@ -143,9 +142,11 @@ class ConsoleWriter:
                     # Check for datatype hooks and use instead
                     value = self.hook_loader.run_hook(value)
 
-                    lines[i] += "└── {}".format(
-                        highlight(value, self.python_lexer, self.terminal_formater).rstrip()
-                    )
+                    highlighted_value = highlight(
+                        value, self.python_lexer, self.terminal_formater
+                    ).rstrip()
+
+                    lines[i] += f"└── {highlighted_value}"
 
                     # Add spacing row
                     if offsets:
@@ -164,8 +165,7 @@ class ConsoleWriter:
         """Write out the line which throws runtime error with highlighting"""
         self.write_newline()
         self.left_offset = len(str(lineno))
-        self._write_out(" {} {} {}\n".format(
-            lineno,
-            self.left_bar(),
-            highlight(line, self.python_lexer, self.terminal_formater).rstrip())
-        )
+        highlighted_line = highlight(
+            line, self.python_lexer, self.terminal_formater
+        ).rstrip()
+        self._write_out(f" {lineno} {self.left_bar()} {highlighted_line}\n")

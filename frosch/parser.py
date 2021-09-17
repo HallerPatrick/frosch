@@ -24,11 +24,14 @@ from cheap_repr import cheap_repr
 from stack_data import Source
 from yapf.yapflib.yapf_api import FormatCode
 
+
 class ParseError(Exception):
     """Thrown in crashing line cannot be parsed with ast.parse"""
 
+
 class MissingStacktraceError(Exception):
     """Thrown when traceback cannot be found"""
+
 
 class Variable:
     """Dataclass for a variable in error throwing line of program"""
@@ -40,10 +43,12 @@ class Variable:
 
     def __repr__(self):
         """str representation of a Variable object"""
-        return "Variable({!r}, {}, {!r})".format(self.name, self.col_offset, self.value)
+        return f"Variable({self.name!r}, {self.col_offset}, {self.value!r})"
 
-    def __eq__(self, other: "Variable"):
+    def __eq__(self, other: object) -> bool:
         """Mainly for testing purpose"""
+        if not isinstance(other, Variable):
+            return NotImplemented
         return self.__hash__() == other.__hash__()
 
     def __hash__(self):
@@ -58,15 +63,15 @@ class Variable:
     def tree_str(self):
         """Python>3.8 variable declaration format with types"""
         if self.value is None:
-            return "{} = None".format(self.name)
-        return "{}: {} = {}".format(
-                self.name,
-                type(self.value).__qualname__,
-                cheap_repr(self.value)
+            return f"{self.name} = None"
+        return (
+            f"{self.name}: {type(self.value).__qualname__} = {cheap_repr(self.value)}"
         )
 
-class ParsedException():
+
+class ParsedException:
     """Handling all data relevant to parsing and formatting the received exception raising"""
+
     def __init__(self, traceback_: TracebackType, error_type, error_message):
         self.traceback = traceback_
         self.error_type = error_type
@@ -79,7 +84,6 @@ class ParsedException():
             self.last_stack = stack[-1]
         except IndexError as error:
             raise MissingStacktraceError("No stacktrace can be extracted") from error
-
 
         self.line = self._get_source_line()
         self.variables = self._get_variables()
@@ -98,11 +102,12 @@ class ParsedException():
         """Get a list of variable objects holding all vars contained in the source line"""
         return self._get_vars_from_tb()
 
-
     def _extract_tokens_from_stack(self):
         """Load file of stack and get the relevant tokens from statement"""
         # Get the source of the last stack
-        source = Source(self.last_stack.filename, linecache.getlines(self.last_stack.filename))
+        source = Source(
+            self.last_stack.filename, linecache.getlines(self.last_stack.filename)
+        )
 
         # Extract all relevant parts
         tokens = extrace_statement_from_source(source, self.last_stack)
@@ -122,6 +127,7 @@ class ParsedException():
 
         return variables
 
+
 def extrace_statement_from_source(source: Source, last_stack) -> List[List[Token]]:
     """Get frame infos and get code pieces (from stack_data) by line
     of crash """
@@ -136,6 +142,7 @@ def extrace_statement_from_source(source: Source, last_stack) -> List[List[Token
 
     return statement_piece_tokens
 
+
 def extract_source_code(tokens: List[List[Token]]) -> str:
     """Get all strings of the tokens and flatten into on list"""
     statement_line = []
@@ -147,7 +154,10 @@ def extract_source_code(tokens: List[List[Token]]) -> str:
 
     return " ".join(statement_line)
 
-def debug_variables(variables: List[Variable], locals_: dict, globals_: dict) -> List[Variable]:
+
+def debug_variables(
+    variables: List[Variable], locals_: dict, globals_: dict
+) -> List[Variable]:
     """Evaluate for every given variable the value and type"""
     chainmap = ChainMap(locals_, globals_, vars(builtins))
     for var in variables:
@@ -157,6 +167,7 @@ def debug_variables(variables: List[Variable], locals_: dict, globals_: dict) ->
         except KeyError:
             pass
     return variables
+
 
 def parse_error_line(line: str) -> List[Variable]:
     """Parse a line of python code and extract all (variable) names from it"""
@@ -175,9 +186,9 @@ def parse_error_line(line: str) -> List[Variable]:
             try:
                 tree = ast.parse(line + "pass")
             except SyntaxError as syntax_error:
-                raise ParseError("Could not parse line: {}".format(line)) from syntax_error
+                raise ParseError(f"Could not parse line: {line}") from syntax_error
         else:
-            raise ParseError("Could not parse line: {}".format(line)) from error
+            raise ParseError(f"Could not parse line: {line}") from error
 
     for node in ast.walk(tree):
         # For now just try to do it with names
@@ -185,13 +196,14 @@ def parse_error_line(line: str) -> List[Variable]:
             variables.append(Variable(node.id, node.col_offset))
     return variables
 
+
 def format_line(line: str) -> str:
     """Try format a source code line"""
 
     formatted_line = line
     try:
         # If we handling multilines this will not be parsed
-        formatted_line, _ =  FormatCode(line)
+        formatted_line, _ = FormatCode(line)
 
     except IndentationError as _:
         # Case of trying to parse a piece of a statement, like a for loop header
@@ -205,11 +217,12 @@ def format_line(line: str) -> str:
                 formatted_line, _ = FormatCode(line + "pass")
                 formatted_line = formatted_line.replace("pass", "")
             except SyntaxError as syntax_error:
-                raise ParseError("Could not parse line: {}".format(line)) from syntax_error
+                raise ParseError(f"Could not parse line: {line}") from syntax_error
         else:
-            raise ParseError("Could not parse line: {}".format(line)) from error
+            raise ParseError(f"Could not parse line: {line}") from error
 
     return formatted_line.strip()
+
 
 def retrieve_post_mortem_stack_infos(traceback_: TracebackType):
     """Retrieve post mortem all local and global

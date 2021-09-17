@@ -17,8 +17,10 @@ from pygments.style import Style
 
 from .type_hooks import HookLoader
 
+
 class ThemeNotExistsError(Exception):
     """Thrown when trying to import a theme from pygments which does not exist"""
+
 
 class ConfigManager:
     """Used to parse and store configs from various ways of setting"""
@@ -64,7 +66,7 @@ class ConfigManager:
         return self._theme
 
     @theme.setter
-    def theme(self, theme: Union[str, Style]): # pylint: disable=E1136
+    def theme(self, theme: Union[str, Style]):  # pylint: disable=E1136
         """Sets theme object of pygments for given string or already defined custom style"""
         if isinstance(theme, str):
             self._theme = ConfigManager._get_theme_from_string(theme)
@@ -74,32 +76,22 @@ class ConfigManager:
     @staticmethod
     def _get_theme_from_string(theme_string: str) -> Style:
         """Import the according theme from pygments"""
-        pygment_styles_module = "pygments.styles.{}.{}Style".format(
-            theme_string, theme_string.capitalize()
-        )
 
-        pygment_styles_module = "pygments.styles.{}".format(
-            theme_string
-        )
-
-        style_class = "{}Style".format(ConfigManager._capitalize_theme(theme_string))
+        pygment_styles_module_str = f"pygments.styles.{theme_string}"
+        style_class = f"{ConfigManager._capitalize_theme(theme_string)}Style"
 
         try:
-            pygment_styles_module = importlib.import_module(pygment_styles_module)
-            pygment_style_class = getattr(
-                pygment_styles_module,
-                style_class
-            )
+            pygment_styles_module = importlib.import_module(pygment_styles_module_str)
+            pygment_style_class = getattr(pygment_styles_module, style_class)
             return pygment_style_class
         except ImportError as import_error:
-            raise ThemeNotExistsError("Theme: '{}' does not exists.\nPlease check \
-https://github.com/HallerPatrick/frosch#configuration for more infos."
-                .format(theme_string)) from import_error
-        except AttributeError as attr_error: # pragma: no cover
             raise ThemeNotExistsError(
-                "Could not find style '{}' in module '{}'".format(
-                    style_class, pygment_styles_module
-                )
+                f"Theme: '{theme_string}' does not exists.\nPlease check \
+https://github.com/HallerPatrick/frosch#configuration for more infos."
+            ) from import_error
+        except AttributeError as attr_error:  # pragma: no cover
+            raise ThemeNotExistsError(
+                f"Could not find style '{style_class}' in module '{pygment_styles_module_str}'"
             ) from attr_error
 
     @staticmethod
@@ -120,7 +112,9 @@ https://github.com/HallerPatrick/frosch#configuration for more infos."
         return theme_string.replace(" ", "_")
 
     @staticmethod
-    def _get_special_themes(theme_string: str) -> Optional[str]: # pylint: disable=E1136
+    def _get_special_themes(
+        theme_string: str,
+    ) -> Optional[str]:  # pylint: disable=E1136
         """Some theme names cannot be converted programmaticaly
         (or is just to much time to catch all cases), there
         map theme manually"""
@@ -132,9 +126,9 @@ https://github.com/HallerPatrick/frosch#configuration for more infos."
             "paraiso_dark": "ParaisoDark",
             "paraiso_light": "ParaisoLight",
             "rainbow_dash": "RainbowDash",
-            "solarized": "SolarizedDark", # Just use dark for now
+            "solarized": "SolarizedDark",  # Just use dark for now
             "stata_dark": "StataDark",
-            "stata_light": "StataLight"
+            "stata_light": "StataLight",
         }
 
         if theme_string in themes:

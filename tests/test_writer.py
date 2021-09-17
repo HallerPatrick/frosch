@@ -99,10 +99,6 @@ class TestConsoleWriter(TestCase):
         expected_result = ['│ │', '│ └── x: str = \'Other\'', '│', '└── y: str = \'Something\'', '']
         self.assertListEqual(result, expected_result)
 
-    def test_write_debug_tree_raise_exception_no_left_offset_defined(self):
-        with pytest.raises(writer.WrongWriteOrder):
-            self.cw.write_debug_tree([])
-
     def test_write_exception(self):
 
         self.cw.write_traceback = Mock()
