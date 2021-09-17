@@ -15,14 +15,13 @@ Pygments = "^2.7.2"
 stack-data = "^0.1.0"
 asttokens = "^2.0.4"
 yapf = ">=0.30,<0.32"
-pytest-sugar = "^0.9.4"
-cheap_repr = "^0.4.5"
-pylint = "^2.10.2"
+cheap_repr = ">=0.4.5,<0.6.0"
 
 [tool.poetry.dev-dependencies]
-pylint = "^2.11.0"
-pytest = "^6.2.4"
+pylint = "^2.10.2"
+pytest = "^6.2.5"
 pytest-cov = "^2.12.1"
+pytest-sugar = "^0.9.4"
 mypy = "^0.910"
 
 [build-system]
