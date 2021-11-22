@@ -5,43 +5,42 @@ name: Python package
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Python Poetry Action
-      uses: abatilo/actions-poetry@v2.1.0
+      - name: Python Poetry Action
+        uses: abatilo/actions-poetry@v2.1.0
 
-    - name: Install dependencies
-      run: poetry install
+      - name: Install dependencies
+        run: poetry install
 
-    - name: Lint with pylint
-      run: poetry run python -m pylint frosch
+      - name: Lint with pylint
+        run: poetry run python -m pylint frosch
 
-    - name: Test with pytest
-      run: poetry run python -m pytest --cov=frosch tests --cov-report=xml
+      - name: Test with pytest
+        run: poetry run python -m pytest --cov=frosch tests --cov-report=xml
 
-    - uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-        file: ./coverage.xml # optional
-        files: ./coverage1.xml,./coverage2.xml # optional
-        flags: unittests # optional
-        name: codecov-umbrella # optional
-        fail_ci_if_error: true # optional (default = false)
-        verbose: true # optional (default = false)
+      - uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          file: ./coverage.xml # optional
+          files: ./coverage1.xml,./coverage2.xml # optional
+          flags: unittests # optional
+          name: codecov-umbrella # optional
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)

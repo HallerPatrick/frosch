@@ -9,36 +9,33 @@ on:
 
 jobs:
   deploy:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
 
-    - name: Python Poetry Action
-      uses: abatilo/actions-poetry@v2.1.0
+      - name: Python Poetry Action
+        uses: abatilo/actions-poetry@v2.1.0
 
-    - name: Install dependencies
-      run: poetry install
+      - name: Install dependencies
+        run: poetry install
 
-    - name: Lint with pylint
-      run: poetry run python -m pylint frosch
+      - name: Lint with pylint
+        run: poetry run python -m pylint frosch
 
-    - name: Test with pytest
-      run: poetry run python -m pytest tests
-      
-    - name: Test with pytest
-      run: poetry build 
+      - name: Test with pytest
+        run: poetry run python -m pytest tests
 
-    - name: Publish a Python distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_TOKEN }}
+      - name: Build package
+        run: poetry build
 
-
+      - name: Publish a Python distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
