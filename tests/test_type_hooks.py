@@ -43,10 +43,10 @@ class TestLoader(unittest.TestCase):
             lazy_hook_mock.assert_called_once_with("hook_numpy")
 
     def test_lazy_load_torch_hooks_from_variable(self):
-        class tensor:
+        class Tensor:
             pass
 
-        _tensor = tensor()
+        _tensor = Tensor()
         var = Variable("tens", 2, _tensor)
 
         with patch("frosch.type_hooks.HookLoader._lazy_load_hooks") as lazy_hook_mock:
