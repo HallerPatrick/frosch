@@ -2,14 +2,21 @@ import sys
 
 sys.path.append("..")
 
-from frosch.frosch import hook, fprint
+from frosch.frosch import hook
 
 from lib import fails
 
 
 def hello():
-    y = "Some String"
-    fprint(y)
+
+    import torch
+
+    hook()
+
+    t = torch.tensor([1])
+
+    t + "String"
 
 
-hello()
+if __name__ == "__main__":
+    hello()

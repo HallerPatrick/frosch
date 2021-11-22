@@ -24,7 +24,7 @@ from .parser import Variable
 T = Any
 
 # This will probably break/not work if there a types of the same name
-type_to_module = {"ndarray": "numpy"}
+type_to_module = {"ndarray": "numpy", "Tensor": "torch"}
 
 
 class HookLoader:
