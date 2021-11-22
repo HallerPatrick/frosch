@@ -1,0 +1,4 @@
+mkdocs-material
+mkdocstrings
+pymdown-extensions
+frosch
