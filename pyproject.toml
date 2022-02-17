@@ -14,7 +14,7 @@ colorama = "^0.4.4"
 Pygments = "^2.7.2"
 stack-data = ">=0.1,<0.3"
 asttokens = "^2.0.4"
-yapf = ">=0.30,<0.32"
+yapf = ">=0.30,<0.33"
 cheap_repr = ">=0.4.5,<0.6.0"
 
 [tool.poetry.dev-dependencies]
